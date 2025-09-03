@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Showcase</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Web Showcase</h1>
+    <p>HTML & CSS will be built in class. JS utilities are loaded for console play.</p>
+  </header>
+
+  <main>
+    <section>
+      <p>Open your browser DevTools console and try: <code>Utils.now()</code>, <code>Utils.range(5)</code>, <code>Utils.slugify('Hello World!')</code></p>
+    </section>
+    <section>
+      <h2>DOM Methods Demo</h2>
+      <button onclick="addClassDemo()">Add Class</button>
+      <button onclick="removeClassDemo()">Remove Class</button>
+      <button onclick="toggleClassDemo()">Toggle Class</button>
+      <button onclick="createDivDemo()">Create & Remove Div</button>
+    </section>
+    <section>
+      <h2>Async Methods Demo</h2>
+      <button onclick="fetchDemo()">Fetch Example</button>
+      <button onclick="promiseAllDemo()">Promise.all Example</button>
+      <button onclick="promiseRaceDemo()">Promise.race Example</button>
+      <button onclick="asyncAwaitDemo()">Async/Await Example</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
