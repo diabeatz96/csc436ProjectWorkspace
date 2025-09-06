@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Pokemon Smart Search - Bonus Challenge</title>
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .demo-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 5px solid #17a2b8;
+        }
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .suggestion-item:hover, .suggestion-item.selected {
+            background-color: #f0f8ff;
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .pokemon-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        .pokemon-image {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            display: block;
+        }
+        .pokemon-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+        .pokemon-types {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .type-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-name {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+        }
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .code-section {
+            background: #2d3748;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        pre[class*="language-"] {
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .feature-highlight {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+        .challenge-box {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .typing-indicator {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .typing-indicator.show {
+            opacity: 1;
+        }
+        
+        /* Pokemon type colors */
+        .normal { background: #A8A878; }
+        .fire { background: #F08030; }
+        .water { background: #6890F0; }
+        .electric { background: #F8D030; }
+        .grass { background: #78C850; }
+        .ice { background: #98D8D8; }
+        .fighting { background: #C03028; }
+        .poison { background: #A040A0; }
+        .ground { background: #E0C068; }
+        .flying { background: #A890F0; }
+        .psychic { background: #F85888; }
+        .bug { background: #A8B820; }
+        .rock { background: #B8A038; }
+        .ghost { background: #705898; }
+        .dragon { background: #7038F8; }
+        .dark { background: #705848; }
+        .steel { background: #B8B8D0; }
+        .fairy { background: #EE99AC; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Pokemon Smart Search - Bonus Challenge</h1>
+        
+        <div class="challenge-box">
+            <h3>🎯 Challenge Goal</h3>
+            <p>Build a <strong>smart autocomplete search</strong> that demonstrates advanced async JavaScript patterns:</p>
+            <ul>
+                <li><strong>Debounced API calls</strong> - Don't spam the server</li>
+                <li><strong>Intelligent caching</strong> - Store results for faster responses</li>
+                <li><strong>Error handling</strong> - Graceful fallbacks for network issues</li>
+                <li><strong>User experience</strong> - Loading states, keyboard navigation</li>
+                <li><strong>Performance optimization</strong> - Smart data fetching strategies</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h3>🎮 Live Demo - Try It!</h3>
+            <p>Search for Pokemon by name (try typing "pika", "char", "bulb"):</p>
+            
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="pokemonSearch" 
+                    class="search-input" 
+                    placeholder="Search Pokemon..." 
+                    autocomplete="off"
+                >
+                <div class="typing-indicator" id="typingIndicator">🔍 Searching...</div>
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+            
+            <div id="pokemonResult"></div>
+        </div>
+
+        <div class="feature-highlight">
+            <h4>🚀 Advanced Features Implemented</h4>
+            <ul>
+                <li><strong>Debouncing:</strong> Wait 300ms after user stops typing</li>
+                <li><strong>Caching:</strong> Store API results to avoid duplicate calls</li>
+                <li><strong>Keyboard Navigation:</strong> Arrow keys to navigate suggestions</li>
+                <li><strong>Loading States:</strong> Visual feedback during API calls</li>
+                <li><strong>Error Recovery:</strong> Fallback to cached data when API fails</li>
+                <li><strong>Smart Suggestions:</strong> Filter Pokemon names intelligently</li>
+            </ul>
+        </div>
+
+        <div class="code-section">
+            <h3>💻 Implementation Breakdown</h3>
+            
+            <h4>1. Debounced Search Function</h4>
+            <pre><code class="language-javascript">// Debouncing prevents excessive API calls
+function debounce(func, delay) {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+}
+
+// Smart search with caching
+class PokemonSearchEngine {
+    constructor() {
+        this.cache = new Map();
+        this.pokemonList = [];
+        this.isInitialized = false;
+        this.loadPokemonList();
+    }
+
+    async loadPokemonList() {
+        try {
+            const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1000');
+            const data = await response.json();
+            this.pokemonList = data.results.map(pokemon => pokemon.name);
+            this.isInitialized = true;
+            console.log(`📚 Loaded ${this.pokemonList.length} Pokemon names`);
+        } catch (error) {
+            console.error('Failed to load Pokemon list:', error);
+        }
+    }
+
+    // Intelligent filtering with fuzzy matching
+    findMatches(query) {
+        if (!query || !this.isInitialized) return [];
+        
+        const lowerQuery = query.toLowerCase();
+        return this.pokemonList
+            .filter(name => name.includes(lowerQuery))
+            .slice(0, 5) // Limit to 5 suggestions
+            .sort((a, b) => {
+                // Prioritize exact matches at the beginning
+                const aStarts = a.startsWith(lowerQuery);
+                const bStarts = b.startsWith(lowerQuery);
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+                return a.length - b.length; // Shorter names first
+            });
+    }
+
+    async fetchPokemonData(name) {
+        // Check cache first
+        if (this.cache.has(name)) {
+            console.log(`💾 Using cached data for ${name}`);
+            return this.cache.get(name);
+        }
+
+        try {
+            showLoading();
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`);
+            
+            if (!response.ok) {
+                throw new Error(`Pokemon not found: ${response.status}`);
+            }
+
+            const pokemon = await response.json();
+            
+            // Process and cache the data
+            const processedData = {
+                id: pokemon.id,
+                name: pokemon.name,
+                height: pokemon.height,
+                weight: pokemon.weight,
+                types: pokemon.types.map(t => t.type.name),
+                stats: pokemon.stats.map(s => ({
+                    name: s.stat.name,
+                    value: s.base_stat
+                })),
+                sprite: pokemon.sprites.other['official-artwork'].front_default || 
+                       pokemon.sprites.front_default,
+                abilities: pokemon.abilities.map(a => a.ability.name)
+            };
+
+            this.cache.set(name, processedData);
+            console.log(`💾 Cached data for ${name}`);
+            return processedData;
+            
+        } catch (error) {
+            console.error(`Failed to fetch ${name}:`, error);
+            throw error;
+        }
+    }
+}</code></pre>
+
+            <h4>2. UI Management & Event Handling</h4>
+            <pre><code class="language-javascript">// Initialize search engine
+const searchEngine = new PokemonSearchEngine();
+let selectedIndex = -1;
+
+// Debounced search function
+const debouncedSearch = debounce(async (query) => {
+    if (query.length < 2) {
+        hideSuggestions();
+        return;
+    }
+
+    const matches = searchEngine.findMatches(query);
+    showSuggestions(matches);
+}, 300);
+
+// Event listeners for search input
+document.getElementById('pokemonSearch').addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    showTypingIndicator();
+    debouncedSearch(query);
+});
+
+// Keyboard navigation
+document.getElementById('pokemonSearch').addEventListener('keydown', (e) => {
+    const suggestions = document.querySelectorAll('.suggestion-item');
+    
+    switch(e.key) {
+        case 'ArrowDown':
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+            updateSelection();
+            break;
+        case 'ArrowUp':
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, -1);
+            updateSelection();
+            break;
+        case 'Enter':
+            e.preventDefault();
+            if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                const pokemonName = suggestions[selectedIndex].dataset.pokemon;
+                selectPokemon(pokemonName);
+            }
+            break;
+        case 'Escape':
+            hideSuggestions();
+            break;
+    }
+});
+
+// UI helper functions
+function showSuggestions(matches) {
+    const suggestionsEl = document.getElementById('suggestions');
+    
+    if (matches.length === 0) {
+        hideSuggestions();
+        return;
+    }
+
+    suggestionsEl.innerHTML = matches.map((name, index) => `
+        <div class="suggestion-item" data-pokemon="${name}" onclick="selectPokemon('${name}')">
+            🔍 ${name.charAt(0).toUpperCase() + name.slice(1)}
+        </div>
+    `).join('');
+    
+    suggestionsEl.style.display = 'block';
+    selectedIndex = -1;
+    hideTypingIndicator();
+}
+
+async function selectPokemon(name) {
+    try {
+        document.getElementById('pokemonSearch').value = name;
+        hideSuggestions();
+        
+        const pokemon = await searchEngine.fetchPokemonData(name);
+        displayPokemonCard(pokemon);
+        
+    } catch (error) {
+        showError(`Failed to load ${name}. Please try again.`);
+    }
+}
+
+function displayPokemonCard(pokemon) {
+    const resultEl = document.getElementById('pokemonResult');
+    
+    const typeBadges = pokemon.types.map(type => 
+        `<span class="type-badge ${type}">${type}</span>`
+    ).join('');
+    
+    const statsGrid = pokemon.stats.map(stat => `
+        <div class="stat-item">
+            <div class="stat-name">${stat.name.replace('-', ' ')}</div>
+            <div class="stat-value">${stat.value}</div>
+        </div>
+    `).join('');
+    
+    resultEl.innerHTML = `
+        <div class="pokemon-card">
+            <img src="${pokemon.sprite}" alt="${pokemon.name}" class="pokemon-image" 
+                 onerror="this.src='https://via.placeholder.com/150x150?text=No+Image'">
+            <div class="pokemon-name">${pokemon.name}</div>
+            <div class="pokemon-types">${typeBadges}</div>
+            <div style="margin: 15px 0; color: #6c757d;">
+                Height: ${pokemon.height/10}m | Weight: ${pokemon.weight/10}kg
+            </div>
+            <div class="stats-grid">${statsGrid}</div>
+        </div>
+    `;
+}
+
+// Utility functions for UI feedback
+function showTypingIndicator() {
+    document.getElementById('typingIndicator').classList.add('show');
+}
+
+function hideTypingIndicator() {
+    document.getElementById('typingIndicator').classList.remove('show');
+}
+
+function showLoading() {
+    document.getElementById('pokemonResult').innerHTML = 
+        '<div class="loading">🔄 Loading Pokemon data...</div>';
+}
+
+function showError(message) {
+    document.getElementById('pokemonResult').innerHTML = 
+        `<div class="error">⚠️ ${message}</div>`;
+}</code></pre>
+        </div>
+
+        <div class="challenge-box">
+            <h3>🏆 Advanced Challenges</h3>
+            <ol>
+                <li><strong>Implement Fuzzy Search:</strong> Allow typos like "piakchu" → "pikachu"</li>
+                <li><strong>Add Favorites System:</strong> Let users save their favorite Pokemon</li>
+                <li><strong>Team Builder:</strong> Allow selecting multiple Pokemon for a team</li>
+                <li><strong>Battle Calculator:</strong> Compare stats between Pokemon</li>
+                <li><strong>Offline Support:</strong> Cache data in localStorage for offline use</li>
+                <li><strong>Voice Search:</strong> Add speech recognition for hands-free search</li>
+                <li><strong>Mobile Optimization:</strong> Add touch gestures for mobile users</li>
+            </ol>
+        </div>
+
+        <div class="feature-highlight">
+            <h4>🎓 Learning Outcomes</h4>
+            <p>By completing this challenge, students learn:</p>
+            <ul>
+                <li><strong>Debouncing:</strong> Essential for performance in real apps</li>
+                <li><strong>Caching Strategies:</strong> Reduce API calls and improve UX</li>
+                <li><strong>Error Handling:</strong> Graceful degradation patterns</li>
+                <li><strong>Event Management:</strong> Complex user interactions</li>
+                <li><strong>State Management:</strong> Coordinating multiple UI elements</li>
+                <li><strong>Performance Optimization:</strong> Smart data fetching</li>
+                <li><strong>Accessibility:</strong> Keyboard navigation support</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h3>🔧 Try These Experiments</h3>
+            <ul>
+                <li>Open Developer Tools and watch the network tab while searching</li>
+                <li>Try typing quickly - notice how debouncing reduces API calls</li>
+                <li>Search for the same Pokemon twice - see the caching in action</li>
+                <li>Use arrow keys and Enter to navigate suggestions</li>
+                <li>Try invalid Pokemon names to see error handling</li>
+                <li>Search for: "pikachu", "charizard", "mewtwo", "ditto"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Prism.js JavaScript for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script>
+        // Debouncing utility function
+        function debounce(func, delay) {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(null, args), delay);
+            };
+        }
+
+        // Pokemon Search Engine Class
+        class PokemonSearchEngine {
+            constructor() {
+                this.cache = new Map();
+                this.pokemonList = [];
+                this.isInitialized = false;
+                this.loadPokemonList();
+            }
+
+            async loadPokemonList() {
+                try {
+                    console.log('📚 Loading Pokemon list...');
+                    const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1000');
+                    const data = await response.json();
+                    this.pokemonList = data.results.map(pokemon => pokemon.name);
+                    this.isInitialized = true;
+                    console.log(`✅ Loaded ${this.pokemonList.length} Pokemon names`);
+                } catch (error) {
+                    console.error('❌ Failed to load Pokemon list:', error);
+                    // Fallback with common Pokemon names
+                    this.pokemonList = [
+                        'pikachu', 'charizard', 'blastoise', 'venusaur', 'alakazam',
+                        'machamp', 'gengar', 'dragonite', 'mewtwo', 'mew'
+                    ];
+                    this.isInitialized = true;
+                }
+            }
+
+            findMatches(query) {
+                if (!query || !this.isInitialized) return [];
+                
+                const lowerQuery = query.toLowerCase();
+                return this.pokemonList
+                    .filter(name => name.includes(lowerQuery))
+                    .slice(0, 5)
+                    .sort((a, b) => {
+                        const aStarts = a.startsWith(lowerQuery);
+                        const bStarts = b.startsWith(lowerQuery);
+                        if (aStarts && !bStarts) return -1;
+                        if (!aStarts && bStarts) return 1;
+                        return a.length - b.length;
+                    });
+            }
+
+            async fetchPokemonData(name) {
+                if (this.cache.has(name)) {
+                    console.log(`💾 Using cached data for ${name}`);
+                    return this.cache.get(name);
+                }
+
+                try {
+                    showLoading();
+                    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Pokemon not found: ${response.status}`);
+                    }
+
+                    const pokemon = await response.json();
+                    
+                    const processedData = {
+                        id: pokemon.id,
+                        name: pokemon.name,
+                        height: pokemon.height,
+                        weight: pokemon.weight,
+                        types: pokemon.types.map(t => t.type.name),
+                        stats: pokemon.stats.map(s => ({
+                            name: s.stat.name,
+                            value: s.base_stat
+                        })),
+                        sprite: pokemon.sprites.other?.['official-artwork']?.front_default || 
+                               pokemon.sprites.front_default,
+                        abilities: pokemon.abilities.map(a => a.ability.name)
+                    };
+
+                    this.cache.set(name, processedData);
+                    console.log(`💾 Cached data for ${name}`);
+                    return processedData;
+                    
+                } catch (error) {
+                    console.error(`❌ Failed to fetch ${name}:`, error);
+                    throw error;
+                }
+            }
+        }
+
+        // Initialize search engine
+        const searchEngine = new PokemonSearchEngine();
+        let selectedIndex = -1;
+
+        // Debounced search function
+        const debouncedSearch = debounce(async (query) => {
+            if (query.length < 2) {
+                hideSuggestions();
+                return;
+            }
+
+            const matches = searchEngine.findMatches(query);
+            showSuggestions(matches);
+        }, 300);
+
+        // Event listeners
+        document.getElementById('pokemonSearch').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                showTypingIndicator();
+            }
+            debouncedSearch(query);
+        });
+
+        document.getElementById('pokemonSearch').addEventListener('keydown', (e) => {
+            const suggestions = document.querySelectorAll('.suggestion-item');
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+                    updateSelection();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                        const pokemonName = suggestions[selectedIndex].dataset.pokemon;
+                        selectPokemon(pokemonName);
+                    }
+                    break;
+                case 'Escape':
+                    hideSuggestions();
+                    break;
+            }
+        });
+
+        // Click outside to hide suggestions
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                hideSuggestions();
+            }
+        });
+
+        // UI Functions
+        function showSuggestions(matches) {
+            const suggestionsEl = document.getElementById('suggestions');
+            
+            if (matches.length === 0) {
+                hideSuggestions();
+                return;
+            }
+
+            suggestionsEl.innerHTML = matches.map((name, index) => `
+                <div class="suggestion-item" data-pokemon="${name}" onclick="selectPokemon('${name}')">
+                    🔍 ${name.charAt(0).toUpperCase() + name.slice(1)}
+                </div>
+            `).join('');
+            
+            suggestionsEl.style.display = 'block';
+            selectedIndex = -1;
+            hideTypingIndicator();
+        }
+
+        function hideSuggestions() {
+            document.getElementById('suggestions').style.display = 'none';
+            selectedIndex = -1;
+        }
+
+        function updateSelection() {
+            const suggestions = document.querySelectorAll('.suggestion-item');
+            suggestions.forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedIndex);
+            });
+        }
+
+        async function selectPokemon(name) {
+            try {
+                document.getElementById('pokemonSearch').value = name;
+                hideSuggestions();
+                
+                const pokemon = await searchEngine.fetchPokemonData(name);
+                displayPokemonCard(pokemon);
+                
+            } catch (error) {
+                showError(`Failed to load ${name}. Please try again.`);
+            }
+        }
+
+        function displayPokemonCard(pokemon) {
+            const resultEl = document.getElementById('pokemonResult');
+            
+            const typeBadges = pokemon.types.map(type => 
+                `<span class="type-badge ${type}">${type}</span>`
+            ).join('');
+            
+            const statsGrid = pokemon.stats.map(stat => `
+                <div class="stat-item">
+                    <div class="stat-name">${stat.name.replace('-', ' ')}</div>
+                    <div class="stat-value">${stat.value}</div>
+                </div>
+            `).join('');
+            
+            resultEl.innerHTML = `
+                <div class="pokemon-card">
+                    <img src="${pokemon.sprite}" alt="${pokemon.name}" class="pokemon-image" 
+                         onerror="this.src='https://via.placeholder.com/150x150?text=No+Image'">
+                    <div class="pokemon-name">${pokemon.name}</div>
+                    <div class="pokemon-types">${typeBadges}</div>
+                    <div style="margin: 15px 0; color: #6c757d;">
+                        Height: ${pokemon.height/10}m | Weight: ${pokemon.weight/10}kg | ID: #${pokemon.id}
+                    </div>
+                    <div class="stats-grid">${statsGrid}</div>
+                </div>
+            `;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('show');
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('show');
+        }
+
+        function showLoading() {
+            document.getElementById('pokemonResult').innerHTML = 
+                '<div class="loading">🔄 Loading Pokemon data...</div>';
+        }
+
+        function showError(message) {
+            document.getElementById('pokemonResult').innerHTML = 
+                `<div class="error">⚠️ ${message}</div>`;
+        }
+
+        // Console helpers for students
+        console.log('🔍 Pokemon Search Engine loaded!');
+        console.log('💡 Try typing in the search box above');
+        console.log('🔧 Available in console:');
+        console.log('  - searchEngine.cache (see cached Pokemon)');
+        console.log('  - searchEngine.pokemonList (see all Pokemon names)');
+        console.log('  - searchEngine.findMatches("pika") (test search)');
+        
+        // Make searchEngine available globally for experimentation
+        window.searchEngine = searchEngine;
+    </script>
+</body>
+</html>
