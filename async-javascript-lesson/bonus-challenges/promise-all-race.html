@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏁 Promise.all() vs Promise.race() Challenge</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+        
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        h2 {
+            color: #ffff00;
+            border-bottom: 2px solid #ffff00;
+            padding-bottom: 10px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .output {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .api-card {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            display: inline-block;
+            width: 200px;
+            vertical-align: top;
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status.pending { background: #ffa500; color: #000; }
+        .status.success { background: #00ff00; color: #000; }
+        .status.failed { background: #ff0000; color: #fff; }
+        
+        pre {
+            color: #00ff00;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏁 Promise.all() vs Promise.race() Challenge</h1>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <button onclick="demoPromiseAll()">🚀 Launch Promise.all()</button>
+            <button onclick="demoPromiseRace()">🏃‍♂️ Start Promise.race()</button>
+            <button onclick="demoRealWorldScenario()">🌍 Real-World Challenge</button>
+            <button onclick="clearOutput()">🧹 Clear Output</button>
+        </div>
+        
+        <h2>📊 API Status Dashboard</h2>
+        <div id="dashboard">
+            <div class="api-card">
+                <h3>🎵 Music API</h3>
+                <div>Duration: 2000ms</div>
+                <div class="status pending" id="music-status">⏳ Ready</div>
+            </div>
+            
+            <div class="api-card">
+                <h3>📚 Books API</h3>
+                <div>Duration: 1500ms</div>
+                <div class="status pending" id="books-status">⏳ Ready</div>
+            </div>
+            
+            <div class="api-card">
+                <h3>🎬 Movies API</h3>
+                <div>Duration: 3000ms</div>
+                <div class="status pending" id="movies-status">⏳ Ready</div>
+            </div>
+            
+            <div class="api-card">
+                <h3>🎮 Games API</h3>
+                <div>Duration: 1000ms</div>
+                <div class="status pending" id="games-status">⏳ Ready</div>
+            </div>
+        </div>
+        
+        <h2>📺 Console Output</h2>
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        // 🎯 Simulated APIs with different response times
+        function fetchMusic() {
+            return new Promise((resolve) => {
+                updateStatus('music', 'pending', '🔄 Fetching...');
+                setTimeout(() => {
+                    updateStatus('music', 'success', '✅ Complete');
+                    resolve({
+                        api: 'Music',
+                        data: {
+                            song: 'Async Symphony',
+                            artist: 'Promise Orchestra',
+                            duration: '3:42'
+                        },
+                        loadTime: 2000
+                    });
+                }, 2000);
+            });
+        }
+
+        function fetchBooks() {
+            return new Promise((resolve) => {
+                updateStatus('books', 'pending', '🔄 Fetching...');
+                setTimeout(() => {
+                    updateStatus('books', 'success', '✅ Complete');
+                    resolve({
+                        api: 'Books',
+                        data: {
+                            title: 'Async Programming Mastery',
+                            author: 'JavaScript Guru',
+                            pages: 342
+                        },
+                        loadTime: 1500
+                    });
+                }, 1500);
+            });
+        }
+
+        function fetchMovies() {
+            return new Promise((resolve, reject) => {
+                updateStatus('movies', 'pending', '🔄 Fetching...');
+                setTimeout(() => {
+                    const success = Math.random() > 0.3; // 70% success rate
+                    if (success) {
+                        updateStatus('movies', 'success', '✅ Complete');
+                        resolve({
+                            api: 'Movies',
+                            data: {
+                                title: 'The Promise Awakens',
+                                director: 'Async Lucas',
+                                rating: 8.7
+                            },
+                            loadTime: 3000
+                        });
+                    } else {
+                        updateStatus('movies', 'failed', '❌ Failed');
+                        reject(new Error('Movie API server overloaded!'));
+                    }
+                }, 3000);
+            });
+        }
+
+        function fetchGames() {
+            return new Promise((resolve) => {
+                updateStatus('games', 'pending', '🔄 Fetching...');
+                setTimeout(() => {
+                    updateStatus('games', 'success', '✅ Complete');
+                    resolve({
+                        api: 'Games',
+                        data: {
+                            name: 'Async Quest',
+                            genre: 'Adventure RPG',
+                            rating: '4.8/5'
+                        },
+                        loadTime: 1000
+                    });
+                }, 1000);
+            });
+        }
+
+        // 🎨 UI Helper Functions
+        function log(message, color = '#00ff00') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateStatus(api, status, text) {
+            const element = document.getElementById(`${api}-status`);
+            element.className = `status ${status}`;
+            element.textContent = text;
+        }
+
+        function resetStatuses() {
+            ['music', 'books', 'movies', 'games'].forEach(api => {
+                updateStatus(api, 'pending', '⏳ Ready');
+            });
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            resetStatuses();
+        }
+
+        // 🚀 Promise.all() Demo
+        async function demoPromiseAll() {
+            resetStatuses();
+            log('🚀 Starting Promise.all() demo...', '#00ffff');
+            log('📝 Promise.all() waits for ALL promises to complete', '#ffff00');
+            log('⚠️ If ANY promise fails, the whole operation fails!', '#ffa500');
+            
+            console.time('Promise.all() Duration');
+            log('⏰ Starting timer...');
+            
+            try {
+                const results = await Promise.all([
+                    fetchMusic(),
+                    fetchBooks(),
+                    fetchMovies(),
+                    fetchGames()
+                ]);
+                
+                console.timeEnd('Promise.all() Duration');
+                log('⏰ All APIs completed!', '#00ff00');
+                
+                results.forEach(result => {
+                    log(`✅ ${result.api}: ${JSON.stringify(result.data)}`, '#00ff00');
+                });
+                
+                log('🎊 Promise.all() SUCCESS - Got all data!', '#00ff00');
+                
+            } catch (error) {
+                console.timeEnd('Promise.all() Duration');
+                log(`❌ Promise.all() FAILED: ${error.message}`, '#ff0000');
+                log('💥 When one fails, everything fails!', '#ff0000');
+            }
+        }
+
+        // 🏃‍♂️ Promise.race() Demo
+        async function demoPromiseRace() {
+            resetStatuses();
+            log('🏃‍♂️ Starting Promise.race() demo...', '#00ffff');
+            log('📝 Promise.race() returns as soon as ANY promise completes', '#ffff00');
+            log('🏁 First one to finish wins!', '#ffa500');
+            
+            console.time('Promise.race() Duration');
+            log('⏰ Starting race...');
+            
+            try {
+                const winner = await Promise.race([
+                    fetchMusic().then(data => ({...data, winner: true})),
+                    fetchBooks().then(data => ({...data, winner: true})),
+                    fetchMovies().then(data => ({...data, winner: true})),
+                    fetchGames().then(data => ({...data, winner: true}))
+                ]);
+                
+                console.timeEnd('Promise.race() Duration');
+                log(`🏆 WINNER: ${winner.api} API!`, '#00ff00');
+                log(`⚡ Finished in ${winner.loadTime}ms`, '#00ff00');
+                log(`📊 Data: ${JSON.stringify(winner.data)}`, '#00ff00');
+                
+                // Let other APIs finish in background
+                log('🔄 Other APIs still running in background...', '#ffa500');
+                
+            } catch (error) {
+                console.timeEnd('Promise.race() Duration');
+                log(`❌ Promise.race() FAILED: ${error.message}`, '#ff0000');
+            }
+        }
+
+        // 🌍 Real-World Scenario
+        async function demoRealWorldScenario() {
+            resetStatuses();
+            log('🌍 Real-World Scenario: Content Aggregator App', '#00ffff');
+            log('🎯 Goal: Load user dashboard with different content types', '#ffff00');
+            log('💡 Strategy: Use both Promise.all() and Promise.race()', '#ffa500');
+            
+            // Strategy 1: Load critical content first (race)
+            log('\n📱 Step 1: Load critical content first...', '#00ffff');
+            
+            try {
+                const criticalContent = await Promise.race([
+                    fetchGames(),
+                    fetchBooks()
+                ]);
+                
+                log(`✅ Critical content loaded: ${criticalContent.api}`, '#00ff00');
+                log('📱 App can now show initial content to user!', '#00ff00');
+                
+                // Strategy 2: Load remaining content in parallel
+                log('\n🔄 Step 2: Loading remaining content...', '#00ffff');
+                
+                const remainingPromises = [];
+                if (criticalContent.api !== 'Music') remainingPromises.push(fetchMusic());
+                if (criticalContent.api !== 'Movies') remainingPromises.push(fetchMovies());
+                
+                const remainingResults = await Promise.allSettled(remainingPromises);
+                
+                log('📊 All content loading complete!', '#00ff00');
+                
+                remainingResults.forEach(result => {
+                    if (result.status === 'fulfilled') {
+                        log(`✅ ${result.value.api}: Loaded successfully`, '#00ff00');
+                    } else {
+                        log(`❌ Failed to load: ${result.reason.message}`, '#ff0000');
+                        log('🔄 Using cached data instead...', '#ffa500');
+                    }
+                });
+                
+                log('\n🎊 Dashboard fully loaded with graceful degradation!', '#00ff00');
+                
+            } catch (error) {
+                log(`❌ Critical content failed: ${error.message}`, '#ff0000');
+                log('🔄 Falling back to cached content...', '#ffa500');
+            }
+        }
+
+        // 🎓 Educational tooltips on page load
+        window.addEventListener('load', () => {
+            log('🎓 Welcome to Promise.all() vs Promise.race() Challenge!', '#00ffff');
+            log('💡 Click buttons above to see different async patterns', '#ffff00');
+            log('📚 Watch the API status dashboard and timing differences', '#ffa500');
+            log('🎯 Perfect for learning when to use each pattern!', '#00ff00');
+            log('\n🚀 Ready to explore async patterns? Click a button!', '#00ffff');
+        });
+
+        // 🎮 Keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (event.key === '1') demoPromiseAll();
+            if (event.key === '2') demoPromiseRace();
+            if (event.key === '3') demoRealWorldScenario();
+            if (event.key === 'c' || event.key === 'C') clearOutput();
+        });
+    </script>
+</body>
+</html>

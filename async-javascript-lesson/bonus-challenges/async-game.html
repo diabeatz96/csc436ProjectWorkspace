@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Async Adventure Game</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+        
+        .game-header {
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .game-header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .story-section {
+            background: #f8f9fa;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .choice-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .choice-button {
+            display: block;
+            width: 100%;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .choice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+        }
+        
+        .choice-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+            margin: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .ending {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        
+        .reset-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .reset-button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🎮 Async Adventure Game</h1>
+            <p>Every choice triggers an API call! Experience real async programming!</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="health">100</div>
+                <div>❤️ Health</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="gold">50</div>
+                <div>💰 Gold</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="experience">0</div>
+                <div>⭐ XP</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="api-calls">0</div>
+                <div>📡 API Calls</div>
+            </div>
+        </div>
+        
+        <div id="game-content">
+            <!-- Game content will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // 🎮 Game State
+        let gameState = {
+            health: 100,
+            gold: 50,
+            experience: 0,
+            apiCalls: 0,
+            currentScene: 'start',
+            inventory: []
+        };
+
+        // 🎯 Simulated API calls for different game actions
+        async function callGameAPI(action, data = {}) {
+            gameState.apiCalls++;
+            updateStats();
+            
+            console.log(`📡 API Call: ${action}`, data);
+            
+            // Simulate network delay
+            const delay = Math.random() * 2000 + 500; // 500-2500ms
+            await new Promise(resolve => setTimeout(resolve, delay));
+            
+            // Simulate API responses based on action
+            switch (action) {
+                case 'explore':
+                    return {
+                        success: Math.random() > 0.3,
+                        encounter: Math.random() > 0.5 ? 'treasure' : 'monster',
+                        description: data.location,
+                        reward: Math.floor(Math.random() * 30) + 10
+                    };
+                    
+                case 'fight':
+                    const victory = Math.random() > 0.4;
+                    return {
+                        victory: victory,
+                        damage: victory ? Math.floor(Math.random() * 20) + 5 : Math.floor(Math.random() * 30) + 10,
+                        reward: victory ? Math.floor(Math.random() * 50) + 20 : 0,
+                        experience: victory ? Math.floor(Math.random() * 25) + 15 : 5
+                    };
+                    
+                case 'trade':
+                    return {
+                        success: Math.random() > 0.2,
+                        profit: Math.floor(Math.random() * 40) + 10,
+                        item: ['Magic Sword', 'Health Potion', 'Lucky Charm', 'Ancient Map'][Math.floor(Math.random() * 4)]
+                    };
+                    
+                case 'rest':
+                    return {
+                        healed: Math.floor(Math.random() * 40) + 20,
+                        dream: Math.random() > 0.5,
+                        vision: 'You dream of ancient treasures hidden in the depths...'
+                    };
+                    
+                default:
+                    return { success: true, message: 'Unknown action completed' };
+            }
+        }
+
+        // 🎨 UI Helper Functions
+        function updateStats() {
+            document.getElementById('health').textContent = gameState.health;
+            document.getElementById('gold').textContent = gameState.gold;
+            document.getElementById('experience').textContent = gameState.experience;
+            document.getElementById('api-calls').textContent = gameState.apiCalls;
+        }
+
+        function showLoading(message = "Processing your choice...") {
+            const content = document.getElementById('game-content');
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>🔄 ${message}</p>
+                    <p><small>Making API call... Please wait!</small></p>
+                </div>
+            `;
+        }
+
+        function renderScene(scene) {
+            const content = document.getElementById('game-content');
+            content.innerHTML = scene;
+        }
+
+        // 🏰 Game Scenes
+        const scenes = {
+            start: {
+                title: "🏰 The Async Kingdom",
+                story: `
+                    <div class="story-section">
+                        <h2>Welcome, brave adventurer!</h2>
+                        <p>You stand at the gates of the Async Kingdom, where every decision you make triggers a magical API call to the realm's servers. The kingdom's fate depends on your choices!</p>
+                        <p>Your quest: Gather enough experience and gold to become the legendary Async Hero!</p>
+                    </div>
+                `,
+                choices: [
+                    { text: "🌲 Explore the Mysterious Forest", action: 'exploreForest' },
+                    { text: "🏪 Visit the Merchant's Trading Post", action: 'visitTrader' },
+                    { text: "⚔️ Enter the Monster's Lair", action: 'enterLair' },
+                    { text: "🏠 Rest at the Inn", action: 'restAtInn' }
+                ]
+            }
+        };
+
+        // 🎬 Scene Actions
+        async function exploreForest() {
+            showLoading("Exploring the mysterious forest...");
+            
+            try {
+                const result = await callGameAPI('explore', { location: 'Mysterious Forest' });
+                
+                if (result.success) {
+                    if (result.encounter === 'treasure') {
+                        gameState.gold += result.reward;
+                        gameState.experience += 10;
+                        
+                        renderScene(`
+                            <div class="story-section">
+                                <h2>🌲 Forest Exploration - Success!</h2>
+                                <p>As you venture deeper into the forest, you stumble upon a hidden treasure chest!</p>
+                                <p>✨ You found ${result.reward} gold coins!</p>
+                                <p>⭐ Gained 10 experience points!</p>
+                            </div>
+                            ${getNextChoices()}
+                        `);
+                    } else {
+                        renderScene(`
+                            <div class="story-section">
+                                <h2>🌲 Forest Exploration - Monster Encounter!</h2>
+                                <p>A wild creature blocks your path! What do you do?</p>
+                            </div>
+                            <div class="choice-section">
+                                <button class="choice-button" onclick="fightMonster()">⚔️ Fight the Monster</button>
+                                <button class="choice-button" onclick="runAway()">🏃‍♂️ Run Away</button>
+                            </div>
+                        `);
+                    }
+                } else {
+                    gameState.health -= 15;
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>🌲 Forest Exploration - Mishap!</h2>
+                            <p>You got lost in the forest and took some damage from thorny bushes!</p>
+                            <p>💔 Lost 15 health points!</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                }
+                
+                updateStats();
+                
+            } catch (error) {
+                renderScene(`
+                    <div class="story-section">
+                        <h2>❌ Network Error!</h2>
+                        <p>The magical connection to the forest spirits was interrupted!</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                    ${getNextChoices()}
+                `);
+            }
+        }
+
+        async function visitTrader() {
+            showLoading("Traveling to the trading post...");
+            
+            try {
+                const result = await callGameAPI('trade');
+                
+                if (result.success && gameState.gold >= 20) {
+                    gameState.gold -= 20;
+                    gameState.gold += result.profit;
+                    gameState.inventory.push(result.item);
+                    
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>🏪 Trading Post - Great Deal!</h2>
+                            <p>The merchant offers you an excellent trade!</p>
+                            <p>💰 Spent 20 gold, earned ${result.profit} gold profit!</p>
+                            <p>🎁 Acquired: ${result.item}</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                } else if (gameState.gold < 20) {
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>🏪 Trading Post - Not Enough Gold!</h2>
+                            <p>The merchant shakes his head. "You need at least 20 gold to trade with me!"</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                } else {
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>🏪 Trading Post - Bad Deal!</h2>
+                            <p>The merchant's offer doesn't seem trustworthy. You decide not to trade.</p>
+                            <p>⭐ Gained 5 wisdom experience!</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                    gameState.experience += 5;
+                }
+                
+                updateStats();
+                
+            } catch (error) {
+                renderScene(`
+                    <div class="story-section">
+                        <h2>❌ Trading API Down!</h2>
+                        <p>The merchant's magical ledger is experiencing technical difficulties!</p>
+                    </div>
+                    ${getNextChoices()}
+                `);
+            }
+        }
+
+        async function enterLair() {
+            showLoading("Entering the monster's lair...");
+            
+            renderScene(`
+                <div class="story-section">
+                    <h2>⚔️ Monster's Lair</h2>
+                    <p>You hear growling echoes from the dark cave. A fierce battle awaits!</p>
+                </div>
+                <div class="choice-section">
+                    <button class="choice-button" onclick="fightMonster()">⚔️ Fight with Valor</button>
+                    <button class="choice-button" onclick="sneakAttack()">🗡️ Attempt Sneak Attack</button>
+                    <button class="choice-button" onclick="runAway()">🏃‍♂️ Retreat Safely</button>
+                </div>
+            `);
+        }
+
+        async function fightMonster() {
+            showLoading("Engaging in epic battle...");
+            
+            try {
+                const result = await callGameAPI('fight');
+                
+                if (result.victory) {
+                    gameState.gold += result.reward;
+                    gameState.experience += result.experience;
+                    gameState.health -= result.damage;
+                    
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>⚔️ Victory!</h2>
+                            <p>Your blade strikes true! The monster is defeated!</p>
+                            <p>💰 Looted ${result.reward} gold!</p>
+                            <p>⭐ Gained ${result.experience} experience!</p>
+                            <p>💔 Lost ${result.damage} health in the battle</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                } else {
+                    gameState.health -= result.damage;
+                    gameState.experience += result.experience;
+                    
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>💔 Defeat!</h2>
+                            <p>The monster overpowers you! You barely escape with your life!</p>
+                            <p>💔 Lost ${result.damage} health!</p>
+                            <p>⭐ Gained ${result.experience} experience from the encounter</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                }
+                
+                updateStats();
+                checkGameOver();
+                
+            } catch (error) {
+                renderScene(`
+                    <div class="story-section">
+                        <h2>❌ Battle System Error!</h2>
+                        <p>The combat calculations failed due to server issues!</p>
+                    </div>
+                    ${getNextChoices()}
+                `);
+            }
+        }
+
+        async function sneakAttack() {
+            showLoading("Attempting stealth approach...");
+            
+            const result = await callGameAPI('fight');
+            const sneakSuccess = Math.random() > 0.6; // 40% sneak success rate
+            
+            if (sneakSuccess && result.victory) {
+                gameState.gold += result.reward * 1.5; // Bonus for sneak attack
+                gameState.experience += result.experience + 10;
+                
+                renderScene(`
+                    <div class="story-section">
+                        <h2>🗡️ Perfect Sneak Attack!</h2>
+                        <p>You strike from the shadows! Critical hit!</p>
+                        <p>💰 Looted ${Math.floor(result.reward * 1.5)} gold (sneak bonus!)!</p>
+                        <p>⭐ Gained ${result.experience + 10} experience!</p>
+                    </div>
+                    ${getNextChoices()}
+                `);
+            } else {
+                // Failed sneak attack leads to normal fight
+                await fightMonster();
+            }
+            
+            updateStats();
+        }
+
+        async function runAway() {
+            showLoading("Making a strategic retreat...");
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            renderScene(`
+                <div class="story-section">
+                    <h2>🏃‍♂️ Strategic Retreat</h2>
+                    <p>Sometimes discretion is the better part of valor. You escape safely!</p>
+                    <p>⭐ Gained 3 wisdom experience!</p>
+                </div>
+                ${getNextChoices()}
+            `);
+            
+            gameState.experience += 3;
+            updateStats();
+        }
+
+        async function restAtInn() {
+            showLoading("Resting at the cozy inn...");
+            
+            try {
+                const result = await callGameAPI('rest');
+                
+                if (gameState.gold >= 15) {
+                    gameState.gold -= 15;
+                    gameState.health += result.healed;
+                    gameState.health = Math.min(gameState.health, 100); // Cap at 100
+                    
+                    let scene = `
+                        <div class="story-section">
+                            <h2>🏠 Restful Night</h2>
+                            <p>You spend the night at the inn and wake up refreshed!</p>
+                            <p>💰 Spent 15 gold for lodging</p>
+                            <p>❤️ Restored ${result.healed} health!</p>
+                    `;
+                    
+                    if (result.dream) {
+                        scene += `<p>✨ ${result.vision}</p>`;
+                        gameState.experience += 8;
+                        scene += `<p>⭐ The prophetic dream grants you 8 experience!</p>`;
+                    }
+                    
+                    scene += `</div>${getNextChoices()}`;
+                    renderScene(scene);
+                } else {
+                    renderScene(`
+                        <div class="story-section">
+                            <h2>🏠 Inn - No Vacancy (Not Enough Gold)</h2>
+                            <p>The innkeeper apologizes, but you need 15 gold for a room.</p>
+                            <p>You sleep outside and recover a little health naturally.</p>
+                            <p>❤️ Restored 10 health from outdoor rest</p>
+                        </div>
+                        ${getNextChoices()}
+                    `);
+                    gameState.health += 10;
+                    gameState.health = Math.min(gameState.health, 100);
+                }
+                
+                updateStats();
+                
+            } catch (error) {
+                renderScene(`
+                    <div class="story-section">
+                        <h2>❌ Inn Booking System Down!</h2>
+                        <p>The inn's reservation system is offline!</p>
+                    </div>
+                    ${getNextChoices()}
+                `);
+            }
+        }
+
+        function getNextChoices() {
+            // Check for victory condition
+            if (gameState.experience >= 100 && gameState.gold >= 200) {
+                return `
+                    <div class="ending">
+                        <h2>🏆 LEGENDARY ASYNC HERO!</h2>
+                        <p>Congratulations! You've mastered the art of async programming!</p>
+                        <p>Final Stats: ${gameState.experience} XP, ${gameState.gold} Gold, ${gameState.health} Health</p>
+                        <p>You made ${gameState.apiCalls} API calls during your adventure!</p>
+                        <button class="reset-button" onclick="resetGame()">🔄 Start New Adventure</button>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="choice-section">
+                    <h3>What's your next move?</h3>
+                    <button class="choice-button" onclick="exploreForest()">🌲 Explore Forest Again</button>
+                    <button class="choice-button" onclick="visitTrader()">🏪 Visit Trader</button>
+                    <button class="choice-button" onclick="enterLair()">⚔️ Seek Adventure in Lair</button>
+                    <button class="choice-button" onclick="restAtInn()">🏠 Rest at Inn</button>
+                </div>
+            `;
+        }
+
+        function checkGameOver() {
+            if (gameState.health <= 0) {
+                renderScene(`
+                    <div class="ending">
+                        <h2>💀 Game Over!</h2>
+                        <p>Your async adventure has come to an end!</p>
+                        <p>Final Stats: ${gameState.experience} XP, ${gameState.gold} Gold</p>
+                        <p>You made ${gameState.apiCalls} API calls during your journey!</p>
+                        <p>Every async call taught you something about programming!</p>
+                        <button class="reset-button" onclick="resetGame()">🔄 Try Again</button>
+                    </div>
+                `);
+            }
+        }
+
+        function resetGame() {
+            gameState = {
+                health: 100,
+                gold: 50,
+                experience: 0,
+                apiCalls: 0,
+                currentScene: 'start',
+                inventory: []
+            };
+            updateStats();
+            startGame();
+        }
+
+        function startGame() {
+            renderScene(scenes.start.story + `
+                <div class="choice-section">
+                    <h3>Choose your first adventure:</h3>
+                    <button class="choice-button" onclick="exploreForest()">🌲 Explore the Mysterious Forest</button>
+                    <button class="choice-button" onclick="visitTrader()">🏪 Visit the Merchant's Trading Post</button>
+                    <button class="choice-button" onclick="enterLair()">⚔️ Enter the Monster's Lair</button>
+                    <button class="choice-button" onclick="restAtInn()">🏠 Rest at the Inn</button>
+                </div>
+            `);
+        }
+
+        // 🚀 Initialize game
+        window.addEventListener('load', () => {
+            updateStats();
+            startGame();
+        });
+    </script>
+</body>
+</html>

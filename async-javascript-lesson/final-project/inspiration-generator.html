@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Daily Inspiration Generator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        button { 
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto 30px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+        }
+        
+        #loading { 
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        #content { 
+            text-align: center;
+        }
+        
+        #content img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        blockquote {
+            font-style: italic;
+            margin: 20px 0;
+            font-size: 18px;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        blockquote::before {
+            content: '"';
+            font-size: 60px;
+            color: #007bff;
+            position: absolute;
+            left: -20px;
+            top: -10px;
+        }
+        
+        .author {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Daily Inspiration Generator</h1>
+        <button onclick="displayInspiration()">Get New Inspiration! ✨</button>
+        
+        <div id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>✨ Generating your daily inspiration...</p>
+        </div>
+        
+        <div id="content"></div>
+    </div>
+    
+    <script>
+        // 🎯 Main inspiration generator function
+        async function generateInspiration() {
+            try {
+                console.log('🔍 Fetching random quote...');
+                
+                // Fetch a random quote
+                const quoteResponse = await fetch('https://api.quotable.io/random');
+                
+                if (!quoteResponse.ok) {
+                    throw new Error(`Quote API failed: ${quoteResponse.status}`);
+                }
+                
+                const quoteData = await quoteResponse.json();
+                console.log('✅ Quote fetched successfully!');
+                
+                // Create the inspiration object with random image
+                const inspiration = {
+                    quote: quoteData.content,
+                    author: quoteData.author,
+                    image: `https://picsum.photos/400/300?random=${Date.now()}`
+                };
+                
+                return inspiration;
+            } catch (error) {
+                console.error("❌ Error generating inspiration:", error);
+                
+                // Fallback inspiration for when APIs fail
+                return {
+                    quote: "The best time to plant a tree was 20 years ago. The second best time is now.",
+                    author: "Chinese Proverb",
+                    image: "https://picsum.photos/400/300?random=1"
+                };
+            }
+        }
+
+        // 🎨 Display function with loading animation
+        async function displayInspiration() {
+            const loadingDiv = document.getElementById('loading');
+            const contentDiv = document.getElementById('content');
+            
+            // Show loading animation
+            loadingDiv.style.display = 'block';
+            contentDiv.style.display = 'none';
+            
+            try {
+                const inspiration = await generateInspiration();
+                
+                // Simulate a short delay for better UX
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (inspiration) {
+                    contentDiv.innerHTML = `
+                        <img src="${inspiration.image}" alt="Inspiration" loading="lazy">
+                        <blockquote>
+                            ${inspiration.quote}
+                        </blockquote>
+                        <p class="author">— ${inspiration.author}</p>
+                    `;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = `
+                    <p style="color: #ff4444;">😕 Oops! Something went wrong. Please try again!</p>
+                `;
+            }
+            
+            // Hide loading and show content
+            loadingDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+        }
+
+        // 🚀 Load first inspiration when page loads
+        window.addEventListener('load', () => {
+            console.log('🎉 Inspiration Generator loaded! Ready for async adventures!');
+            displayInspiration();
+        });
+
+        // 🔥 Bonus: Add keyboard shortcut
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ' || event.key === 'Enter') {
+                event.preventDefault();
+                displayInspiration();
+            }
+        });
+    </script>
+</body>
+</html>
