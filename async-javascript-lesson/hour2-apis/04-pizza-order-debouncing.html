@@ -71,6 +71,7 @@
             outline: none;
             transition: all 0.3s ease;
             font-family: inherit;
+            box-sizing: border-box;
         }
         
         .order-input:focus {
@@ -171,16 +172,30 @@
         }
         
         .code-example {
-            background: #2d3748;
-            color: #e2e8f0;
+            background: #1a1a1a;
+            color: #ffffff;
             padding: 20px;
             border-radius: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.7;
             overflow-x: auto;
             margin: 15px 0;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            font-weight: 500;
+        }
+
+        .code-example pre {
+            margin: 0;
+            color: #ffffff;
+            background: transparent;
+        }
+
+        .code-example code {
+            color: #ffffff !important;
+            background: transparent;
+            font-family: inherit;
+            font-weight: 500;
         }
         
         .highlight {
@@ -430,6 +445,188 @@ pizzaInput.addEventListener('input', (e) => {
         </div>
         
         <div class="demo-section">
+            <h3>🔬 Debounce Function: Line-by-Line Breakdown</h3>
+            <p>Let's dissect the debounce function to understand every concept and how it handles different numbers of arguments:</p>
+            
+            <div class="code-example">
+                <div class="code-header">
+                    <span>🔍</span> Detailed Analysis - debounce-breakdown.js
+                </div>
+                <pre><code class="language-javascript">// 🎯 LINE 1: Function declaration with parameters
+function debounce(func, delay) {
+    // func = the function we want to debounce
+    // delay = how long to wait (in milliseconds)
+    
+    // 🏠 LINE 2: Create a closure variable to store timer ID
+    let timeoutId;  
+    // This variable persists between function calls due to closure
+    // It's like Tony's notepad to remember if he has a timer running
+    
+    // 🎁 LINE 3: Return a new function (this is what gets called repeatedly)
+    return (...args) => {
+        // ...args = "rest parameter" - collects ALL arguments into an array
+        // Whether you pass 0, 1, 5, or 100 arguments, they all get collected!
+        
+        // ❌ LINE 4: Cancel any existing timer
+        clearTimeout(timeoutId);  
+        // Like erasing Tony's previous timer before starting a new one
+        // This is the KEY to debouncing - we reset the countdown
+        
+        // ⏰ LINE 5-7: Set a new timer
+        timeoutId = setTimeout(() => {
+            // This function runs ONLY after the delay expires
+            func.apply(null, args);  // 🎯 THE MAGIC LINE!
+        }, delay);
+    };
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>⚡ The Magic of func.apply(null, args)</h3>
+            <p>This line is the heart of how debounce handles any number of arguments:</p>
+            
+            <div class="code-example">
+                <div class="code-header">
+                    <span>✨</span> Understanding func.apply()
+                </div>
+                <pre><code class="language-javascript">// 🎯 What func.apply(null, args) does:
+// - func = the original function we're debouncing
+// - null = 'this' context (we don't need it here)
+// - args = array of arguments collected by ...args
+
+// 📝 Example: Our pizza checking function
+function checkKitchenIngredients(orderText) {
+    console.log(`👨‍🍳 Tony checks: "${orderText}"`);
+}
+
+// 🔧 When we create the debounced version:
+const debouncedCheck = debounce(checkKitchenIngredients, 300);
+
+// 🎮 When we call it:
+debouncedCheck("pepperoni pizza");
+
+// 📋 Here's what happens step by step:
+// 1. debouncedCheck gets called with "pepperoni pizza"
+// 2. ...args collects this into: ["pepperoni pizza"]
+// 3. clearTimeout(timeoutId) cancels any existing timer
+// 4. setTimeout creates new timer for 300ms
+// 5. After 300ms: func.apply(null, ["pepperoni pizza"])
+// 6. This is equivalent to: checkKitchenIngredients("pepperoni pizza")</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🤔 Why Does This Work With Different Argument Counts?</h3>
+            
+            <div class="code-example">
+                <div class="code-header">
+                    <span>🧩</span> Flexible Arguments Demo
+                </div>
+                <pre><code class="language-javascript">// 🍕 Function that takes 2 arguments
+function orderPizza(type, size) {
+    console.log(`Ordering ${size} ${type} pizza`);
+}
+
+// 🔧 Debounced version (same debounce function!)
+const debouncedOrder = debounce(orderPizza, 300);
+
+// ✅ Calling with 2 arguments:
+debouncedOrder("pepperoni", "large");
+// args becomes: ["pepperoni", "large"]
+// After 300ms: orderPizza.apply(null, ["pepperoni", "large"])
+// Which calls: orderPizza("pepperoni", "large")
+
+// ✅ Calling with 1 argument:
+debouncedOrder("margherita");
+// args becomes: ["margherita"]  
+// After 300ms: orderPizza.apply(null, ["margherita"])
+// Which calls: orderPizza("margherita", undefined)
+// The 'size' parameter gets undefined, which is fine!
+
+// ✅ Even with NO arguments:
+debouncedOrder();
+// args becomes: []
+// After 300ms: orderPizza.apply(null, [])  
+// Which calls: orderPizza(undefined, undefined)
+
+// 🎯 The key insight: 
+// JavaScript functions are flexible with arguments!
+// Extra arguments are ignored, missing ones become undefined</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🔄 How Closure Makes This Work</h3>
+            <p>The debounce function uses <strong>closure</strong> - one of JavaScript's most powerful concepts:</p>
+            
+            <div class="code-example">
+                <div class="code-header">
+                    <span>🏠</span> Closure Explanation
+                </div>
+                <pre><code class="language-javascript">// 🏗️ When we call debounce():
+const debouncedCheck = debounce(checkKitchenIngredients, 300);
+
+// 📋 What happens internally:
+// 1. debounce function creates a 'timeoutId' variable
+// 2. debounce returns a NEW function: (...args) => { ... }
+// 3. This NEW function "remembers" the timeoutId variable
+// 4. This is called CLOSURE - inner function accessing outer variables
+
+// 🎯 Every time we call debouncedCheck():
+debouncedCheck("pepperoni");  // 1st call
+debouncedCheck("sausage");    // 2nd call  
+debouncedCheck("mushroom");   // 3rd call
+
+// 📝 Each call:
+// 1. Uses the SAME timeoutId variable (shared memory!)
+// 2. Cancels previous timer: clearTimeout(timeoutId)
+// 3. Sets new timer: timeoutId = setTimeout(...)
+// 4. Only the LAST call (mushroom) actually executes after 300ms
+
+// 🏠 Closure = Inner function + Variables it can access
+// It's like Tony having a persistent notepad that survives between orders!</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎭 Real Example: Our Pizza Demo</h3>
+            
+            <div class="code-example">
+                <div class="code-header">
+                    <span>🍕</span> Live Demo Code Analysis  
+                </div>
+                <pre><code class="language-javascript">// 📱 In our demo, this is what happens:
+
+// 1️⃣ We define the original function (takes 1 argument)
+function checkKitchenIngredients(orderText) {
+    console.log(`👨‍🍳 Tony checks: "${orderText}"`);
+    // Update UI, make API call, etc.
+}
+
+// 2️⃣ We create debounced version
+const debouncedKitchenCheck = debounce(checkKitchenIngredients, 300);
+
+// 3️⃣ User types "pepperoni" one letter at a time:
+debouncedKitchenCheck("p");        // Timer starts: 300ms
+debouncedKitchenCheck("pe");       // Previous timer cancelled, new: 300ms  
+debouncedKitchenCheck("pep");      // Previous timer cancelled, new: 300ms
+debouncedKitchenCheck("pepp");     // Previous timer cancelled, new: 300ms
+debouncedKitchenCheck("peppe");    // Previous timer cancelled, new: 300ms
+debouncedKitchenCheck("pepper");   // Previous timer cancelled, new: 300ms
+debouncedKitchenCheck("peppero");  // Previous timer cancelled, new: 300ms
+debouncedKitchenCheck("pepperon"); // Previous timer cancelled, new: 300ms
+debouncedKitchenCheck("pepperoni");// Previous timer cancelled, new: 300ms
+// User stops typing... 300ms later:
+// checkKitchenIngredients("pepperoni") finally executes!
+
+// 🎯 Result: 9 keystrokes, but only 1 API call!
+// Without debouncing: 9 API calls (one per keystroke)
+// With debouncing: 1 API call (after user stops typing)</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
             <h3>🧠 Key Takeaways</h3>
             <div style="font-size: 1.1em; line-height: 1.8;">
                 <p><strong>🎯 Debouncing Pattern:</strong> "Wait a moment before acting"</p>
@@ -437,6 +634,9 @@ pizzaInput.addEventListener('input', (e) => {
                 <p><strong>😊 User Experience:</strong> Smoother, more responsive apps</p>
                 <p><strong>🔧 Implementation:</strong> Simple but powerful utility function</p>
                 <p><strong>🌍 Universal:</strong> Works in any JavaScript environment</p>
+                <p><strong>🏠 Closure:</strong> Inner function remembers outer variables</p>
+                <p><strong>🎁 Rest Parameters:</strong> ...args collects any number of arguments</p>
+                <p><strong>✨ Function.apply():</strong> Calls function with array of arguments</p>
             </div>
         </div>
     </div>
