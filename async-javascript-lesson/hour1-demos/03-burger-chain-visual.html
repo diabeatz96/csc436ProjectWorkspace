@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍔 Burger Chain Promise Adventure</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #FF8A65, #FFAB40, #FFD54F);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.3em;
+            margin-bottom: 30px;
+        }
+
+        .burger-assembly-line {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            border: 3px solid #fd7e14;
+        }
+
+        .assembly-step {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.5s ease;
+            border: 3px solid #dee2e6;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .assembly-step.active {
+            border-color: #fd7e14;
+            background: linear-gradient(145deg, #fff3cd, #ffeeba);
+            animation: working 1s ease-in-out infinite alternate;
+        }
+
+        .assembly-step.completed {
+            border-color: #28a745;
+            background: linear-gradient(145deg, #d4edda, #c3e6cb);
+            transform: scale(1.05);
+        }
+
+        .assembly-step.waiting {
+            opacity: 0.5;
+            background: #f8f9fa;
+        }
+
+        @keyframes working {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .step-icon {
+            font-size: 3em;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .step-icon.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .step-description {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .demo-btn {
+            background: linear-gradient(145deg, #fd7e14, #e8590c);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .demo-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .timeline-container {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .timeline-header {
+            color: #74b9ff;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .timeline-entry {
+            margin: 8px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            animation: slideIn 0.5s ease-out;
+            border-left: 4px solid #74b9ff;
+        }
+
+        .timeline-entry.step {
+            background: rgba(116, 185, 255, 0.1);
+        }
+
+        .timeline-entry.success {
+            background: rgba(39, 174, 96, 0.2);
+            border-left-color: #27ae60;
+        }
+
+        .timeline-entry.info {
+            background: rgba(243, 156, 18, 0.2);
+            border-left-color: #f39c12;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            height: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #fd7e14, #e8590c);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #dee2e6;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #fd7e14;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .demo-section {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 6px solid #fd7e14;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .code-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .highlight {
+            background: rgba(255, 255, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-card {
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .sequential-card {
+            background: linear-gradient(145deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .parallel-card {
+            background: linear-gradient(145deg, #fd79a8, #e84393);
+            color: white;
+        }
+
+        .burger-result {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(145deg, #d4edda, #c3e6cb);
+            border-radius: 15px;
+            border: 3px solid #28a745;
+        }
+
+        .final-burger {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍔 Async Burger Builder</h1>
+        <p class="subtitle">Master Promise Chaining by Building the Perfect Burger!</p>
+        
+        <div class="control-panel">
+            <button class="demo-btn" id="sequentialBtn" onclick="buildBurgerSequentially()">
+                🔗 Build Burger (Sequential Chain)
+            </button>
+            <button class="demo-btn" id="parallelBtn" onclick="buildBurgerParallel()">
+                ⚡ Build Burger (Parallel Tasks)
+            </button>
+            <button class="demo-btn" onclick="resetDemo()">
+                🧹 Reset Demo
+            </button>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill">
+                <div class="progress-text" id="progressText">Ready to Build!</div>
+            </div>
+        </div>
+        
+        <div class="burger-assembly-line">
+            <div class="assembly-step waiting" id="step1">
+                <div class="step-icon" id="icon1">🛒</div>
+                <div class="step-title">Get Ingredients</div>
+                <div class="step-description">Fresh lettuce, tomato, onions, pickles</div>
+            </div>
+            
+            <div class="assembly-step waiting" id="step2">
+                <div class="step-icon" id="icon2">🔥</div>
+                <div class="step-title">Cook Patty</div>
+                <div class="step-description">Grill the perfect beef patty</div>
+            </div>
+            
+            <div class="assembly-step waiting" id="step3">
+                <div class="step-icon" id="icon3">🍞</div>
+                <div class="step-title">Toast Buns</div>
+                <div class="step-description">Golden and crispy buns</div>
+            </div>
+            
+            <div class="assembly-step waiting" id="step4">
+                <div class="step-icon" id="icon4">👨‍🍳</div>
+                <div class="step-title">Assemble Burger</div>
+                <div class="step-description">Put it all together</div>
+            </div>
+            
+            <div class="assembly-step waiting" id="step5">
+                <div class="step-icon" id="icon5">📦</div>
+                <div class="step-title">Package Order</div>
+                <div class="step-description">Ready for delivery</div>
+            </div>
+        </div>
+        
+        <div class="timeline-container">
+            <div class="timeline-header" id="timelineHeader">🕐 Burger Building Timeline</div>
+            <div id="timeline">
+                <div class="timeline-entry info">Click a button above to start building your burger!</div>
+            </div>
+        </div>
+        
+        <div id="burgerResult" class="burger-result" style="display: none;">
+            <div class="final-burger">🍔</div>
+            <h3>🎉 Your Burger is Ready!</h3>
+            <p id="completionMessage">Delicious burger made with love!</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTime">0s</div>
+                <div class="stat-label">Total Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stepsCompleted">0/5</div>
+                <div class="stat-label">Steps Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="buildMethod">-</div>
+                <div class="stat-label">Build Method</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="efficiency">0%</div>
+                <div class="stat-label">Efficiency</div>
+            </div>
+        </div>
+        
+        <div class="comparison-grid">
+            <div class="comparison-card sequential-card">
+                <h3>🔗 Sequential (Chain)</h3>
+                <div style="font-size: 2em; margin: 15px 0;">⏰</div>
+                <p><strong>One step at a time</strong></p>
+                <ul style="text-align: left;">
+                    <li>Each step waits for the previous</li>
+                    <li>Longer total time</li>
+                    <li>Guaranteed order</li>
+                    <li>Uses .then() chaining</li>
+                </ul>
+            </div>
+            
+            <div class="comparison-card parallel-card">
+                <h3>⚡ Parallel</h3>
+                <div style="font-size: 2em; margin: 15px 0;">🚀</div>
+                <p><strong>Multiple steps simultaneously</strong></p>
+                <ul style="text-align: left;">
+                    <li>Independent tasks run together</li>
+                    <li>Faster total time</li>
+                    <li>More efficient</li>
+                    <li>Uses Promise.all()</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>💻 Promise Chaining Code</h3>
+            <div class="code-example">
+                <div class="code-header">
+                    <span>🍔</span> burger-chain.js
+                </div>
+                <pre><code class="language-javascript">// Sequential Promise Chain
+getIngredients()
+    .then(ingredients => {
+        console.log("✅", ingredients);
+        return cookPatty();  // Return next promise
+    })
+    .then(patty => {
+        console.log("✅", patty);
+        return toastBuns();  // Chain continues
+    })
+    .then(buns => {
+        console.log("✅", buns);
+        return assembleBurger();
+    })
+    .then(burger => {
+        console.log("🍔 Burger ready!");
+        return packageOrder();
+    })
+    .catch(error => {
+        console.error("❌ Something went wrong:", error);
+    });
+
+// Parallel with Promise.all
+Promise.all([
+    getIngredients(),
+    cookPatty(),
+    toastBuns()
+])
+.then(results => {
+    console.log("All done simultaneously!");
+    return assembleBurger();
+})
+.then(burger => packageOrder());</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎯 Key Concepts</h3>
+            <div style="font-size: 1.1em; line-height: 1.8;">
+                <p><strong>🔗 Promise Chaining:</strong> Link promises with .then() for sequential operations</p>
+                <p><strong>⚡ Promise.all():</strong> Run multiple promises simultaneously</p>
+                <p><strong>📤 Return Values:</strong> Each .then() can return a value or another promise</p>
+                <p><strong>🛡️ Error Handling:</strong> One .catch() handles all chain errors</p>
+                <p><strong>⏱️ Timing:</strong> Sequential = additive time, Parallel = maximum time</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let completedSteps = 0;
+        let isBuilding = false;
+        
+        const steps = [
+            { id: 'step1', icon: 'icon1', name: 'Get Ingredients', time: 1000, emoji: '🥬🍅' },
+            { id: 'step2', icon: 'icon2', name: 'Cook Patty', time: 1500, emoji: '🍖' },
+            { id: 'step3', icon: 'icon3', name: 'Toast Buns', time: 800, emoji: '🍞' },
+            { id: 'step4', icon: 'icon4', name: 'Assemble Burger', time: 500, emoji: '🍔' },
+            { id: 'step5', icon: 'icon5', name: 'Package Order', time: 300, emoji: '📦' }
+        ];
+
+        function addTimelineEntry(message, type = 'step') {
+            const timeline = document.getElementById('timeline');
+            const entry = document.createElement('div');
+            entry.className = `timeline-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `[${timestamp}] ${message}`;
+            timeline.appendChild(entry);
+            timeline.scrollTop = timeline.scrollHeight;
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function updateStats(method) {
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            document.getElementById('totalTime').textContent = elapsed + 's';
+            document.getElementById('stepsCompleted').textContent = completedSteps + '/5';
+            document.getElementById('buildMethod').textContent = method;
+            
+            const theoretical = method === 'Sequential' ? 4.1 : 1.5; // Expected times
+            const efficiency = Math.min(100, Math.round((theoretical / elapsed) * 100));
+            document.getElementById('efficiency').textContent = efficiency + '%';
+        }
+
+        function setStepState(stepIndex, state) {
+            const step = document.getElementById(steps[stepIndex].id);
+            const icon = document.getElementById(steps[stepIndex].icon);
+            
+            step.className = `assembly-step ${state}`;
+            if (state === 'active') {
+                icon.classList.add('spinning');
+            } else {
+                icon.classList.remove('spinning');
+            }
+        }
+
+        function resetDemo() {
+            if (isBuilding) return;
+            
+            completedSteps = 0;
+            steps.forEach((_, index) => setStepState(index, 'waiting'));
+            
+            document.getElementById('timeline').innerHTML = 
+                '<div class="timeline-entry info">Click a button above to start building your burger!</div>';
+            document.getElementById('burgerResult').style.display = 'none';
+            updateProgress(0, 'Ready to Build!');
+            updateStats('-');
+            
+            document.getElementById('sequentialBtn').disabled = false;
+            document.getElementById('parallelBtn').disabled = false;
+        }
+
+        // Burger building functions
+        function getIngredients() {
+            return new Promise(resolve => {
+                addTimelineEntry('🛒 Going to get ingredients...', 'step');
+                setStepState(0, 'active');
+                setTimeout(() => {
+                    addTimelineEntry('✅ Got fresh lettuce, tomato, onion, and pickles!', 'success');
+                    setStepState(0, 'completed');
+                    completedSteps++;
+                    resolve('🥬🍅 Fresh ingredients ready!');
+                }, steps[0].time);
+            });
+        }
+
+        function cookPatty() {
+            return new Promise(resolve => {
+                addTimelineEntry('🔥 Putting patty on the grill...', 'step');
+                setStepState(1, 'active');
+                setTimeout(() => {
+                    addTimelineEntry('✅ Patty is perfectly grilled!', 'success');
+                    setStepState(1, 'completed');
+                    completedSteps++;
+                    resolve('🍖 Juicy patty cooked to perfection!');
+                }, steps[1].time);
+            });
+        }
+
+        function toastBuns() {
+            return new Promise(resolve => {
+                addTimelineEntry('🍞 Toasting burger buns...', 'step');
+                setStepState(2, 'active');
+                setTimeout(() => {
+                    addTimelineEntry('✅ Buns are golden and crispy!', 'success');
+                    setStepState(2, 'completed');
+                    completedSteps++;
+                    resolve('🍞 Perfectly toasted buns!');
+                }, steps[2].time);
+            });
+        }
+
+        function assembleBurger() {
+            return new Promise(resolve => {
+                addTimelineEntry('👨‍🍳 Master chef is assembling the burger...', 'step');
+                setStepState(3, 'active');
+                setTimeout(() => {
+                    addTimelineEntry('✅ Burger assembled with love!', 'success');
+                    setStepState(3, 'completed');
+                    completedSteps++;
+                    resolve('🍔 Amazing burger ready to eat!');
+                }, steps[3].time);
+            });
+        }
+
+        function packageOrder() {
+            return new Promise(resolve => {
+                addTimelineEntry('📦 Packaging your order...', 'step');
+                setStepState(4, 'active');
+                setTimeout(() => {
+                    addTimelineEntry('✅ Order packaged and ready for pickup!', 'success');
+                    setStepState(4, 'completed');
+                    completedSteps++;
+                    resolve('🎁 Order ready for delivery!');
+                }, steps[4].time);
+            });
+        }
+
+        // Sequential burger building
+        async function buildBurgerSequentially() {
+            if (isBuilding) return;
+            isBuilding = true;
+            
+            document.getElementById('sequentialBtn').disabled = true;
+            document.getElementById('parallelBtn').disabled = true;
+            
+            resetDemo();
+            startTime = Date.now();
+            completedSteps = 0;
+            
+            addTimelineEntry('🍔 Starting Sequential Burger Build!', 'info');
+            updateProgress(10, 'Building Sequentially...');
+
+            try {
+                const ingredients = await getIngredients();
+                updateProgress(20, 'Ingredients Ready!');
+                
+                const patty = await cookPatty();
+                updateProgress(40, 'Patty Cooked!');
+                
+                const buns = await toastBuns();
+                updateProgress(60, 'Buns Toasted!');
+                
+                const burger = await assembleBurger();
+                updateProgress(80, 'Burger Assembled!');
+                
+                const packaged = await packageOrder();
+                updateProgress(100, 'Order Complete!');
+                
+                addTimelineEntry('🎉 Sequential burger build completed!', 'success');
+                showBurgerResult('Sequential Chain Method');
+                updateStats('Sequential');
+                
+            } catch (error) {
+                addTimelineEntry('❌ Something went wrong: ' + error, 'error');
+            } finally {
+                isBuilding = false;
+                document.getElementById('sequentialBtn').disabled = false;
+                document.getElementById('parallelBtn').disabled = false;
+            }
+        }
+
+        // Parallel burger building
+        async function buildBurgerParallel() {
+            if (isBuilding) return;
+            isBuilding = true;
+            
+            document.getElementById('sequentialBtn').disabled = true;
+            document.getElementById('parallelBtn').disabled = true;
+            
+            resetDemo();
+            startTime = Date.now();
+            completedSteps = 0;
+            
+            addTimelineEntry('🍔 Starting Parallel Burger Build!', 'info');
+            updateProgress(10, 'Building in Parallel...');
+
+            try {
+                // Run first three steps in parallel
+                addTimelineEntry('⚡ Running multiple tasks simultaneously!', 'info');
+                setStepState(0, 'active');
+                setStepState(1, 'active');
+                setStepState(2, 'active');
+                
+                const [ingredients, patty, buns] = await Promise.all([
+                    getIngredients(),
+                    cookPatty(),
+                    toastBuns()
+                ]);
+                
+                updateProgress(60, 'Parallel Tasks Done!');
+                addTimelineEntry('🚀 All parallel tasks completed!', 'success');
+                
+                // Now assemble and package sequentially
+                const burger = await assembleBurger();
+                updateProgress(80, 'Burger Assembled!');
+                
+                const packaged = await packageOrder();
+                updateProgress(100, 'Order Complete!');
+                
+                addTimelineEntry('🎉 Parallel burger build completed!', 'success');
+                showBurgerResult('Parallel Promise.all() Method');
+                updateStats('Parallel');
+                
+            } catch (error) {
+                addTimelineEntry('❌ Something went wrong: ' + error, 'error');
+            } finally {
+                isBuilding = false;
+                document.getElementById('sequentialBtn').disabled = false;
+                document.getElementById('parallelBtn').disabled = false;
+            }
+        }
+
+        function showBurgerResult(method) {
+            const resultDiv = document.getElementById('burgerResult');
+            const messageEl = document.getElementById('completionMessage');
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            
+            messageEl.textContent = `Built using ${method} in ${elapsed} seconds!`;
+            resultDiv.style.display = 'block';
+            
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize
+        addTimelineEntry('🍔 Welcome to Async Burger Builder!', 'info');
+        addTimelineEntry('🎮 Choose Sequential or Parallel building method above!', 'info');
+        
+        // Console helpers
+        console.log('🍔 Burger Chain Demo Loaded!');
+        console.log('🎮 Use the buttons above to build burgers!');
+        console.log('🔧 Available functions:');
+        console.log('  - buildBurgerSequentially()');
+        console.log('  - buildBurgerParallel()');
+        console.log('  - resetDemo()');
+        
+        // Make functions available globally
+        window.buildBurgerSequentially = buildBurgerSequentially;
+        window.buildBurgerParallel = buildBurgerParallel;
+        window.resetDemo = resetDemo;
+    </script>
+</body>
+</html>

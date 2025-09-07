@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍕 Sync vs Async - Tony's Pizza Shop</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .demo-section {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 6px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .restaurant-layout {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .kitchen-area {
+            flex: 1;
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #ffc107;
+            min-height: 200px;
+        }
+
+        .customer-area {
+            flex: 1;
+            background: #d4edda;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #28a745;
+            min-height: 200px;
+        }
+
+        .pizza-chef {
+            font-size: 4em;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .pizza-chef.working {
+            animation: working 0.5s ease-in-out infinite alternate;
+        }
+
+        .pizza-chef.blocked {
+            color: #dc3545;
+            animation: blocked 1s ease-in-out infinite;
+        }
+
+        @keyframes working {
+            from { transform: rotate(-5deg) scale(1); }
+            to { transform: rotate(5deg) scale(1.1); }
+        }
+
+        @keyframes blocked {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); color: #dc3545; }
+            100% { transform: scale(1); }
+        }
+
+        .customer {
+            font-size: 2em;
+            display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .customer.happy {
+            background: #d4edda;
+            color: #155724;
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        .customer.angry {
+            background: #f8d7da;
+            color: #721c24;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .customer.waiting {
+            background: #fff3cd;
+            color: #856404;
+            animation: waiting 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes waiting {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .demo-buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .demo-btn {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .demo-btn.bad {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+        }
+
+        .demo-btn.good {
+            background: linear-gradient(145deg, #27ae60, #229954);
+        }
+
+        .timeline {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            min-height: 150px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .log-entry.success {
+            background: rgba(46, 204, 113, 0.2);
+            border-left: 3px solid #2ecc71;
+        }
+
+        .log-entry.warning {
+            background: rgba(241, 196, 15, 0.2);
+            border-left: 3px solid #f1c40f;
+        }
+
+        .log-entry.error {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 3px solid #e74c3c;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-card {
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .sync-card {
+            background: linear-gradient(145deg, #ff7675, #fd79a8);
+            color: white;
+        }
+
+        .async-card {
+            background: linear-gradient(145deg, #00b894, #55a3ff);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #ecf0f1;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 15px;
+        }
+
+        .explanation-box {
+            background: #f8f9ff;
+            border: 2px solid #6c5ce7;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .code-snippet {
+            background: #2d3748;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .code-header {
+            background: #1a202c;
+            padding: 10px 15px;
+            color: #a0aec0;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-content {
+            padding: 20px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            color: #e2e8f0;
+        }
+
+        .code-snippet pre {
+            margin: 0;
+            padding: 20px;
+            background: #2d3748;
+            color: #e2e8f0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .code-snippet code {
+            color: #e2e8f0;
+            background: transparent;
+            padding: 0;
+            font-family: inherit;
+        }
+
+        .keyword { color: #c792ea; font-weight: bold; }
+        .string { color: #c3e88d; }
+        .function-name { color: #82aaff; font-weight: bold; }
+        .comment { color: #546e7a; font-style: italic; }
+        .operator { color: #89ddff; }
+        .number { color: #f78c6c; }
+        .property { color: #ffcb6b; }
+        .parameter { color: #f07178; }
+
+        .highlight {
+            background: rgba(255, 255, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍕 Tony's Pizza Shop: Sync vs Async</h1>
+        
+        <div class="demo-section">
+            <h3>🎮 Interactive Demo</h3>
+            <p>Watch how Tony's restaurant runs differently with blocking vs non-blocking operations!</p>
+            
+            <div class="demo-buttons">
+                <button class="demo-btn bad" onclick="demonstrateBlocking()">
+                    ❌ Show Blocking Way (Synchronous)
+                </button>
+                <button class="demo-btn good" onclick="demonstrateAsync()">
+                    ✅ Show Non-Blocking Way (Asynchronous)
+                </button>
+                <button class="demo-btn" onclick="clearDemo()">
+                    🧹 Clear Timeline
+                </button>
+            </div>
+            
+            <div class="restaurant-layout">
+                <div class="kitchen-area">
+                    <h4>👨‍🍳 Tony's Kitchen</h4>
+                    <div class="pizza-chef" id="chef">👨‍🍳</div>
+                    <div id="kitchenStatus">Ready to cook!</div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cookingProgress"></div>
+                    </div>
+                </div>
+                
+                <div class="customer-area">
+                    <h4>😊 Customers</h4>
+                    <div id="customerArea">
+                        <div class="customer" id="customer1">🧑‍💼</div>
+                        <div class="customer" id="customer2">👩‍💻</div>
+                        <div class="customer" id="customer3">👨‍🎓</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="timeline" id="timeline">
+                <div style="color: #74b9ff; font-weight: bold;">🕐 Restaurant Timeline - Watch what happens!</div>
+            </div>
+        </div>
+        
+        <div class="comparison-grid">
+            <div class="comparison-card sync-card">
+                <h3>❌ Synchronous (Blocking)</h3>
+                <div style="font-size: 3em; margin: 20px 0;">🚫</div>
+                <p><strong>One task at a time</strong></p>
+                <ul style="text-align: left;">
+                    <li>Chef cooks one pizza completely</li>
+                    <li>All customers wait in line</li>
+                    <li>Restaurant feels slow</li>
+                    <li>Poor customer experience</li>
+                </ul>
+            </div>
+            
+            <div class="comparison-card async-card">
+                <h3>✅ Asynchronous (Non-Blocking)</h3>
+                <div style="font-size: 3em; margin: 20px 0;">⚡</div>
+                <p><strong>Multiple tasks simultaneously</strong></p>
+                <ul style="text-align: left;">
+                    <li>Chef starts pizza, helps others</li>
+                    <li>Customers served immediately</li>
+                    <li>Restaurant runs smoothly</li>
+                    <li>Great customer experience</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="explanation-box">
+            <h3>🧠 Understanding the Code</h3>
+            
+            <h4>❌ Blocking (Synchronous) Code:</h4>
+            <div class="code-snippet">
+                <div class="code-header">
+                    <span>🚫</span> blocking-code.js
+                </div>
+                <pre><code class="language-javascript">// This BLOCKS everything else!
+console.log("🍕 Starting to cook pizza...");
+
+for(let i = 0; i < 1000000000; i++) {
+    // Heavy computation blocks the main thread
+    if (i % 100000000 === 0) {
+        console.log(`🔄 Pizza cooking... ${(i/1000000000 * 100)}% done`);
+    }
+}
+
+console.log("🎉 Pizza is ready!");
+console.log("📋 Taking another order..."); // Had to wait!</code></pre>
+            </div>
+            
+            <h4>✅ Non-Blocking (Asynchronous) Code:</h4>
+            <div class="code-snippet">
+                <div class="code-header">
+                    <span>⚡</span> non-blocking-code.js
+                </div>
+                <pre><code class="language-javascript">// This allows other things to happen!
+console.log("🍕 Starting to cook pizza...");
+
+setTimeout(() => {
+    console.log("🎉 Pizza is ready!");
+}, 2000); // Pizza cooks in the "background"
+
+console.log("📋 Taking another order..."); // Runs immediately!
+console.log("📋 Taking yet another order..."); // This too!
+console.log("✨ Restaurant is running smoothly!");</code></pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎯 Key Takeaways</h3>
+            <div style="font-size: 1.1em; line-height: 1.8;">
+                <p><strong>🚫 Synchronous/Blocking:</strong> Like having only one cashier who does everything sequentially</p>
+                <p><strong>⚡ Asynchronous/Non-Blocking:</strong> Like having a smart team that multitasks efficiently</p>
+                <p><strong>🌐 In Web Development:</strong> Async prevents UI freezing during long operations</p>
+                <p><strong>🔧 JavaScript Tools:</strong> setTimeout, Promises, async/await enable async programming</p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🧪 Try This Experiment</h3>
+            <p>Open your browser's Developer Tools (F12) and run these in the console:</p>
+            <div class="code-snippet">
+                <div class="code-header">
+                    <span>🧪</span> experiment.js - Try in Console
+                </div>
+                <pre><code class="language-javascript">// Blocking version - Watch your browser freeze!
+console.log("Start blocking");
+for (let i = 0; i < 1000000000; i++) {
+    // This blocks everything!
+} 
+console.log("End blocking");
+
+// Non-blocking version - Browser stays responsive!
+console.log("Start non-blocking");
+setTimeout(() => {
+    console.log("End non-blocking");
+}, 2000);
+console.log("This runs immediately!");</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const timeline = document.getElementById('timeline');
+        const chef = document.getElementById('chef');
+        const kitchenStatus = document.getElementById('kitchenStatus');
+        const cookingProgress = document.getElementById('cookingProgress');
+        const customers = ['customer1', 'customer2', 'customer3'];
+        
+        let logCounter = 0;
+
+        function addLog(message, type = 'success') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            timeline.appendChild(logEntry);
+            timeline.scrollTop = timeline.scrollHeight;
+        }
+
+        function updateChef(state) {
+            chef.className = `pizza-chef ${state}`;
+        }
+
+        function updateCustomers(states) {
+            customers.forEach((customerId, index) => {
+                const customer = document.getElementById(customerId);
+                customer.className = `customer ${states[index] || ''}`;
+            });
+        }
+
+        function updateProgress(percent) {
+            cookingProgress.style.width = percent + '%';
+        }
+
+        function clearDemo() {
+            timeline.innerHTML = '<div style="color: #74b9ff; font-weight: bold;">🕐 Restaurant Timeline - Watch what happens!</div>';
+            updateChef('');
+            updateCustomers(['', '', '']);
+            updateProgress(0);
+            kitchenStatus.textContent = 'Ready to cook!';
+        }
+
+        async function demonstrateBlocking() {
+            clearDemo();
+            addLog('=== ❌ BLOCKING/SYNCHRONOUS DEMO STARTING ===', 'warning');
+            
+            addLog('🍕 Customer 1 orders pizza...', 'success');
+            updateCustomers(['waiting', '', '']);
+            updateChef('working');
+            kitchenStatus.textContent = 'Cooking pizza... EVERYTHING IS BLOCKED!';
+            
+            // Simulate blocking operation with visual progress
+            for (let i = 0; i <= 100; i += 10) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                updateProgress(i);
+                addLog(`🔄 Pizza cooking... ${i}% done (STILL BLOCKING!)`, 'warning');
+                updateChef('blocked');
+            }
+            
+            addLog('🎉 Pizza is ready for Customer 1!', 'success');
+            updateCustomers(['happy', 'angry', 'angry']);
+            updateChef('');
+            updateProgress(0);
+            
+            addLog('📋 Now Customer 2 can FINALLY order...', 'error');
+            addLog('📋 Customer 3 had to wait this whole time too!', 'error');
+            addLog('😞 Customers 2 & 3 are angry about waiting!', 'error');
+            addLog('💸 Lost potential customers due to slow service', 'error');
+            
+            kitchenStatus.textContent = 'Blocking approach complete - customers unhappy!';
+        }
+
+        async function demonstrateAsync() {
+            clearDemo();
+            addLog('=== ✅ NON-BLOCKING/ASYNCHRONOUS DEMO STARTING ===', 'success');
+            
+            addLog('🍕 Customer 1 orders pizza...', 'success');
+            updateCustomers(['waiting', '', '']);
+            updateChef('working');
+            kitchenStatus.textContent = 'Started pizza for Customer 1...';
+            
+            // Start cooking in background (non-blocking)
+            setTimeout(async () => {
+                for (let i = 0; i <= 100; i += 20) {
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    updateProgress(i);
+                }
+                addLog('🎉 Pizza ready for Customer 1!', 'success');
+                updateCustomers(['happy', 'happy', 'happy']);
+                updateChef('');
+                kitchenStatus.textContent = 'All orders handled efficiently!';
+                updateProgress(0);
+            }, 1000);
+            
+            // These happen immediately while pizza cooks
+            setTimeout(() => {
+                addLog('📋 Customer 2 orders drinks - served immediately!', 'success');
+                updateCustomers(['waiting', 'happy', '']);
+            }, 500);
+            
+            setTimeout(() => {
+                addLog('📋 Customer 3 orders salad - served immediately!', 'success'); 
+                updateCustomers(['waiting', 'happy', 'happy']);
+            }, 1000);
+            
+            setTimeout(() => {
+                addLog('✨ Restaurant running smoothly - all customers happy!', 'success');
+                addLog('📈 Multiple orders processed simultaneously', 'success');
+                addLog('⚡ Non-blocking = better performance & UX', 'success');
+            }, 1500);
+        }
+
+        // Console helpers for experimentation
+        console.log('🍕 Sync vs Async Demo Loaded!');
+        console.log('🎮 Click the buttons above to see the demos');
+        console.log('🔧 Available functions:');
+        console.log('  - demonstrateBlocking()');
+        console.log('  - demonstrateAsync()');
+        console.log('  - clearDemo()');
+        
+        // Make functions available globally
+        window.demonstrateBlocking = demonstrateBlocking;
+        window.demonstrateAsync = demonstrateAsync;
+        window.clearDemo = clearDemo;
+    </script>
+</body>
+</html>
