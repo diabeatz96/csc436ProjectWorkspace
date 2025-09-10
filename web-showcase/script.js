@@ -4,15 +4,54 @@
   - Each function has a brief description and quick example
 */
 
+    let variable = true;
+    const adam = [10]
+
+    let person = {
+    name: 'John',
+    age: 30,
+    greet: function() {
+      return 'Hi, I am ' + this.name;
+    }
+  };
+  console.log(person.greet());
+
+  for (let i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+
+function createCounter() {
+  let count = 0;
+  return function() {
+    count++;
+    return count;
+  };
+}
+
+let counter = createCounter();
+console.log(counter());
+console.log(counter());
+
     // map: transform each item
     const arr = [1, 2, 3];
-    const doubled = arr.map(x => x * 2); // [2, 4, 6]
 
+    const doubled = arr.map(x => x * 2); // [2, 4, 6]
+    
+    console.log(doubled)
+
+    // function double (x) {
+    //   return x * 2
+    // } 
     // filter: keep items that match
     const evens = arr.filter(x => x % 2 === 0); // [2]
 
+    console.log(evens);
+
     // reduce: accumulate a value
     const sum = arr.reduce((acc, x) => acc + x, 0); // 6
+
+    console.log(sum)
+
 
     // find: first matching item
     const found = arr.find(x => x > 1); // 2
@@ -41,6 +80,7 @@
     const str = "hello world";
     // split: string to array
     const words = str.split(" "); // ["hello", "world"]
+    console.log(words)
 
     // join: array to string
     const joined = words.join("-"); // "hello-world"
