@@ -809,10 +809,10 @@ const virtualDOM = {
         <div className="live-state-demo">
           <h4>🎮 Interactive useState Demo:</h4>
           <div className="demo-controls">
-            <div className="demo-output">
+            <div className="state-demo-container">
               <div className="like-button-demo">
                 <button
-                  className={`demo-btn ${liveDemo.isLiked ? 'liked' : ''}`}
+                  className={`state-demo-btn primary ${liveDemo.isLiked ? 'liked' : ''}`}
                   onClick={() => setLiveDemo(prev => ({
                     ...prev,
                     likes: prev.likes + 1,
@@ -822,22 +822,30 @@ const virtualDOM = {
                   👍 {liveDemo.likes} Likes
                 </button>
                 <button
-                  className="demo-btn reset"
+                  className="state-demo-btn secondary"
                   onClick={() => setLiveDemo(prev => ({
                     ...prev,
                     likes: 0,
                     isLiked: false
                   }))}
                 >
-                  Reset
+                  🔄 Reset
                 </button>
               </div>
-              <p className="demo-status">
-                {liveDemo.likes === 0 && "Click the like button to see state in action! 👆"}
-                {liveDemo.likes > 0 && liveDemo.likes < 5 && `You've liked this ${liveDemo.likes} time${liveDemo.likes > 1 ? 's' : ''}! 🎉`}
-                {liveDemo.likes >= 5 && liveDemo.likes < 10 && "Wow, you really like this! 🚀"}
-                {liveDemo.likes >= 10 && "You're a React enthusiast! 🌟"}
-              </p>
+              <div className="state-display">
+                <div className="state-info">
+                  <span className="state-label">Current State:</span>
+                  <code className="state-value">
+                    {`{ likes: ${liveDemo.likes}, isLiked: ${liveDemo.isLiked} }`}
+                  </code>
+                </div>
+                <p className="demo-status">
+                  {liveDemo.likes === 0 && "🎯 Click the like button to see state in action!"}
+                  {liveDemo.likes > 0 && liveDemo.likes < 5 && `🎉 You've liked this ${liveDemo.likes} time${liveDemo.likes > 1 ? 's' : ''}!`}
+                  {liveDemo.likes >= 5 && liveDemo.likes < 10 && "🚀 Wow, you really like this!"}
+                  {liveDemo.likes >= 10 && "🌟 You're a React enthusiast!"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -894,6 +902,255 @@ function LikeButton() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="concept-card">
+        <div className="concept-header">
+          <h3>🎯 Event Handling in React</h3>
+          <span className="concept-badge">Interactive</span>
+        </div>
+        <p className="concept-intro">
+          Event handling is how React components respond to user interactions like clicks, typing, form submissions, and mouse movements.
+          React uses synthetic events that work consistently across all browsers.
+        </p>
+
+        <div className="event-concepts">
+          <div className="event-concept">
+            <div className="concept-icon">🖱️</div>
+            <div>
+              <h4>Synthetic Events</h4>
+              <p>React wraps native browser events in SyntheticEvent objects, providing consistent behavior across different browsers and devices.</p>
+            </div>
+          </div>
+
+          <div className="event-concept">
+            <div className="concept-icon">🎪</div>
+            <div>
+              <h4>Event Handlers</h4>
+              <p>Functions that run when events occur. You pass them to JSX elements using camelCase event props like onClick, onChange, onSubmit.</p>
+            </div>
+          </div>
+
+          <div className="event-concept">
+            <div className="concept-icon">📊</div>
+            <div>
+              <h4>Event Object</h4>
+              <p>Contains information about the event (target element, mouse position, key pressed, etc.) and methods like preventDefault().</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="event-examples-grid">
+          <div className="event-demo-section">
+            <h4>🎮 Interactive Event Examples:</h4>
+            <EventHandlingDemo />
+          </div>
+        </div>
+
+        <button
+          className="example-btn"
+          onClick={() => setShowExample(showExample === 'events' ? null : 'events')}
+        >
+          {showExample === 'events' ? 'Hide' : 'Show'} Event Handling Code Examples
+        </button>
+        {showExample === 'events' && (
+          <div className="events-example">
+            <div className="events-code-grid">
+              <div className="event-code-example">
+                <h5>🖱️ Click Events</h5>
+                <pre className="code-block">{`function ClickDemo() {
+  const [message, setMessage] = useState('');
+
+  const handleClick = (event) => {
+    console.log('Button clicked!');
+    console.log('Event type:', event.type);
+    console.log('Target element:', event.target);
+    setMessage('Button was clicked!');
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>
+        Click Me!
+      </button>
+      <p>{message}</p>
+    </div>
+  );
+}`}</pre>
+              </div>
+
+              <div className="event-code-example">
+                <h5>⌨️ Input Events</h5>
+                <pre className="code-block">{`function InputDemo() {
+  const [text, setText] = useState('');
+
+  const handleChange = (event) => {
+    setText(event.target.value);
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      alert('You typed: ' + text);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={text}
+        onChange={handleChange}
+        onKeyPress={handleKeyPress}
+        placeholder="Type something..."
+      />
+      <p>Live preview: {text}</p>
+    </div>
+  );
+}`}</pre>
+              </div>
+
+              <div className="event-code-example">
+                <h5>📝 Form Events</h5>
+                <pre className="code-block">{`function FormDemo() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: ''
+  });
+
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent page refresh
+    console.log('Form submitted:', formData);
+    alert('Hello ' + formData.name + '!');
+  };
+
+  const handleChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        placeholder="Your name"
+      />
+      <input
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="Your email"
+      />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}`}</pre>
+              </div>
+            </div>
+
+            <div className="event-best-practices">
+              <h5>✅ Event Handling Best Practices:</h5>
+              <ul>
+                <li><strong>Use camelCase:</strong> onClick not onclick, onChange not onchange</li>
+                <li><strong>Pass functions, not calls:</strong> onClick={'{'}<code>handleClick</code>{'}'} not onClick={'{'}<code>handleClick()</code>{'}'}</li>
+                <li><strong>Use event.preventDefault():</strong> To prevent default browser behavior</li>
+                <li><strong>Access event data:</strong> event.target.value, event.key, event.clientX</li>
+                <li><strong>Handle forms properly:</strong> Use onSubmit on form, not onClick on button</li>
+                <li><strong>Use event.stopPropagation():</strong> To prevent event bubbling when needed</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EventHandlingDemo() {
+  const [demoState, setDemoState] = useState({
+    clickCount: 0,
+    inputText: '',
+    mousePosition: { x: 0, y: 0 },
+    selectedOption: '',
+    isHovered: false
+  });
+
+  const handleClick = () => {
+    setDemoState(prev => ({ ...prev, clickCount: prev.clickCount + 1 }));
+  };
+
+  const handleInputChange = (e) => {
+    setDemoState(prev => ({ ...prev, inputText: e.target.value }));
+  };
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDemoState(prev => ({
+      ...prev,
+      mousePosition: { x: Math.round(e.clientX - rect.left), y: Math.round(e.clientY - rect.top) }
+    }));
+  };
+
+  const handleSelectChange = (e) => {
+    setDemoState(prev => ({ ...prev, selectedOption: e.target.value }));
+  };
+
+  return (
+    <div className="event-demo-container">
+      <div className="event-demo-grid">
+        <div className="event-demo-item">
+          <h5>🖱️ Click Events</h5>
+          <button className="event-demo-btn" onClick={handleClick}>
+            Click me! (Clicked: {demoState.clickCount})
+          </button>
+        </div>
+
+        <div className="event-demo-item">
+          <h5>⌨️ Input Events</h5>
+          <input
+            className="event-demo-input"
+            type="text"
+            value={demoState.inputText}
+            onChange={handleInputChange}
+            placeholder="Type something..."
+          />
+          <p className="input-preview">Live: "{demoState.inputText}"</p>
+        </div>
+
+        <div className="event-demo-item">
+          <h5>🖱️ Mouse Events</h5>
+          <div
+            className={`mouse-area ${demoState.isHovered ? 'hovered' : ''}`}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setDemoState(prev => ({ ...prev, isHovered: true }))}
+            onMouseLeave={() => setDemoState(prev => ({ ...prev, isHovered: false }))}
+          >
+            Move mouse here!
+            <p className="mouse-coords">
+              Position: ({demoState.mousePosition.x}, {demoState.mousePosition.y})
+            </p>
+          </div>
+        </div>
+
+        <div className="event-demo-item">
+          <h5>📋 Select Events</h5>
+          <select
+            className="event-demo-select"
+            value={demoState.selectedOption}
+            onChange={handleSelectChange}
+          >
+            <option value="">Choose an option</option>
+            <option value="react">React</option>
+            <option value="javascript">JavaScript</option>
+            <option value="css">CSS</option>
+          </select>
+          <p className="select-result">
+            Selected: {demoState.selectedOption || 'None'}
+          </p>
+        </div>
       </div>
     </div>
   );
