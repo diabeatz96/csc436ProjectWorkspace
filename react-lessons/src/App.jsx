@@ -25,6 +25,7 @@ function App() {
       <main className="main-content">
         {currentView === 'home' && <HomePage setCurrentView={setCurrentView} />}
         {currentView === 'day1' && <Day1 />}
+        {currentView === 'day2' && <Day2 />}
       </main>
     </div>
   );
@@ -61,10 +62,10 @@ function HomePage({ setCurrentView }) {
           </div>
         </div>
 
-        <div className="day-card coming-soon">
+        <div className="day-card available" onClick={() => setCurrentView('day2')}>
           <div className="day-header">
             <span className="day-number">02</span>
-            <span className="day-status">Coming Soon</span>
+            <span className="day-status">Available</span>
           </div>
           <h3>Props & Component Communication</h3>
           <p>Master data flow between components</p>
@@ -1700,6 +1701,1632 @@ function QuickDemo() {
         </div>
         {message && <div className="counter-message">{message}</div>}
       </div>
+    </div>
+  );
+}
+
+function Day2() {
+  const [activeSection, setActiveSection] = useState('props-intro');
+
+  const sections = [
+    { id: 'props-intro', title: '🎯 Props Introduction', icon: '📦' },
+    { id: 'props-flow', title: '⬇️ Data Flow', icon: '🔄' },
+    { id: 'children-props', title: '👶 Children Props', icon: '🎁' },
+    { id: 'callback-props', title: '📞 Callback Props', icon: '⚡' },
+    { id: 'component-patterns', title: '🏗️ Component Patterns', icon: '🧩' },
+    { id: 'prop-types', title: '✅ Prop Validation', icon: '🛡️' },
+    { id: 'practice', title: '💪 Practice Exercise', icon: '🎯' }
+  ];
+
+  return (
+    <div className="lesson-container">
+      <div className="lesson-header">
+        <h1>Day 2: Props & Component Communication</h1>
+        <p>Master the art of passing data between React components</p>
+      </div>
+
+      <div className="lesson-layout">
+        <nav className="lesson-nav">
+          <h3>📚 Lesson Sections</h3>
+          <ul className="section-list">
+            {sections.map(section => (
+              <li key={section.id}>
+                <button
+                  className={`section-btn ${activeSection === section.id ? 'active' : ''}`}
+                  onClick={() => setActiveSection(section.id)}
+                >
+                  <span className="section-icon">{section.icon}</span>
+                  {section.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="lesson-content">
+          {activeSection === 'props-intro' && <PropsIntro />}
+          {activeSection === 'props-flow' && <DataFlow />}
+          {activeSection === 'children-props' && <ChildrenProps />}
+          {activeSection === 'callback-props' && <CallbackProps />}
+          {activeSection === 'component-patterns' && <ComponentPatterns />}
+          {activeSection === 'prop-types' && <PropValidation />}
+          {activeSection === 'practice' && <PropsExercise />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PropsIntro() {
+  const [demoProps, setDemoProps] = useState({
+    name: 'Sarah Chen',
+    age: 22,
+    major: 'Computer Science',
+    isActive: true
+  });
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>🎯 What are Props?</h3>
+          <span className="concept-badge">Foundation</span>
+        </div>
+        <p className="concept-intro">
+          Props (short for "properties") are how React components communicate with each other.
+          Think of props as function arguments - they allow parent components to pass data down to child components.
+        </p>
+
+        <div className="key-concepts">
+          <div className="key-concept">
+            <div className="concept-icon">📦</div>
+            <div>
+              <h4>Read-Only Data</h4>
+              <p>Props are immutable - child components cannot modify the props they receive.</p>
+            </div>
+          </div>
+          <div className="key-concept">
+            <div className="concept-icon">⬇️</div>
+            <div>
+              <h4>Unidirectional Flow</h4>
+              <p>Data flows from parent to child components, creating predictable behavior.</p>
+            </div>
+          </div>
+          <div className="key-concept">
+            <div className="concept-icon">🔄</div>
+            <div>
+              <h4>Dynamic Updates</h4>
+              <p>When props change, the component automatically re-renders with new data.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="code-demo-section">
+          <h4>📝 Basic Props Example</h4>
+          <div className="demo-grid">
+            <div className="code-panel">
+              <h5>Parent Component</h5>
+              <pre className="code-block">{`function App() {
+  return (
+    <div>
+      <StudentProfile
+        name="Sarah Chen"
+        age={22}
+        major="Computer Science"
+        isActive={true}
+      />
+    </div>
+  );
+}`}</pre>
+            </div>
+            <div className="code-panel">
+              <h5>Child Component</h5>
+              <pre className="code-block">{`function StudentProfile(props) {
+  return (
+    <div className="student-card">
+      <h3>{props.name}</h3>
+      <p>Age: {props.age}</p>
+      <p>Major: {props.major}</p>
+      <span className={props.isActive ? 'active' : 'inactive'}>
+        {props.isActive ? 'Active' : 'Inactive'}
+      </span>
+    </div>
+  );
+}`}</pre>
+            </div>
+          </div>
+
+          <div className="live-demo">
+            <h5>🔴 Live Demo - Try changing the props!</h5>
+            <div className="demo-controls">
+              <div className="control-group">
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={demoProps.name}
+                  onChange={(e) => setDemoProps({...demoProps, name: e.target.value})}
+                />
+              </div>
+              <div className="control-group">
+                <label>Age:</label>
+                <input
+                  type="number"
+                  value={demoProps.age}
+                  onChange={(e) => setDemoProps({...demoProps, age: parseInt(e.target.value)})}
+                />
+              </div>
+              <div className="control-group">
+                <label>Major:</label>
+                <select
+                  value={demoProps.major}
+                  onChange={(e) => setDemoProps({...demoProps, major: e.target.value})}
+                >
+                  <option>Computer Science</option>
+                  <option>Mathematics</option>
+                  <option>Engineering</option>
+                  <option>Physics</option>
+                </select>
+              </div>
+              <div className="control-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={demoProps.isActive}
+                    onChange={(e) => setDemoProps({...demoProps, isActive: e.target.checked})}
+                  />
+                  Active Student
+                </label>
+              </div>
+            </div>
+            <div className="demo-result">
+              <StudentCard {...demoProps} />
+            </div>
+          </div>
+        </div>
+
+        <div className="props-rules">
+          <h4>⚡ Props Rules & Best Practices</h4>
+          <ul>
+            <li><strong>Props are read-only:</strong> Never modify props directly in child components</li>
+            <li><strong>Use destructuring:</strong> {'const { name, age } = props;'} or {'function StudentProfile({ name, age })'}</li>
+            <li><strong>Provide defaults:</strong> Use default parameters or defaultProps for optional props</li>
+            <li><strong>Keep props simple:</strong> Pass only what the component needs</li>
+            <li><strong>Validate props:</strong> Use PropTypes or TypeScript for type checking</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DataFlow() {
+  const [appData, setAppData] = useState({
+    theme: 'light',
+    user: { name: 'Alex Johnson', role: 'Student' },
+    notifications: 3,
+    messages: ['Welcome!', 'New assignment available', 'Grade posted']
+  });
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>⬇️ Understanding Data Flow</h3>
+          <span className="concept-badge">Core Concept</span>
+        </div>
+        <p className="concept-intro">
+          React follows a "top-down" or "unidirectional" data flow. Data flows from parent components
+          to child components through props, creating predictable and debuggable applications.
+        </p>
+
+        <div className="data-flow-visual">
+          <h4>🌊 Data Flow Visualization</h4>
+          <div className="flow-diagram">
+            <div className="flow-level">
+              <div className="component-box app-level">
+                <h5>App Component</h5>
+                <div className="data-display">
+                  theme: "{appData.theme}"<br/>
+                  user: {'{'}name: "{appData.user.name}"{'}'}
+                </div>
+              </div>
+            </div>
+            <div className="flow-arrow">⬇️ Props Flow Down ⬇️</div>
+            <div className="flow-level">
+              <div className="component-box">
+                <h5>Header Component</h5>
+                <div className="data-display">Receives: theme, user</div>
+              </div>
+              <div className="component-box">
+                <h5>Dashboard Component</h5>
+                <div className="data-display">Receives: user, notifications</div>
+              </div>
+            </div>
+            <div className="flow-arrow">⬇️ Props Continue Down ⬇️</div>
+            <div className="flow-level">
+              <div className="component-box">
+                <h5>UserProfile</h5>
+                <div className="data-display">Receives: user</div>
+              </div>
+              <div className="component-box">
+                <h5>NotificationBadge</h5>
+                <div className="data-display">Receives: count</div>
+              </div>
+              <div className="component-box">
+                <h5>MessageList</h5>
+                <div className="data-display">Receives: messages</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="interactive-flow-demo">
+          <h4>🎮 Interactive Data Flow Demo</h4>
+          <p>Change the app data and watch how it flows through the component tree:</p>
+
+          <div className="flow-controls">
+            <div className="control-section">
+              <h5>App State Controls</h5>
+              <div className="control-group">
+                <label>Theme:</label>
+                <select
+                  value={appData.theme}
+                  onChange={(e) => setAppData({...appData, theme: e.target.value})}
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                  <option value="blue">Blue</option>
+                </select>
+              </div>
+              <div className="control-group">
+                <label>User Name:</label>
+                <input
+                  type="text"
+                  value={appData.user.name}
+                  onChange={(e) => setAppData({
+                    ...appData,
+                    user: {...appData.user, name: e.target.value}
+                  })}
+                />
+              </div>
+              <div className="control-group">
+                <label>Notifications:</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={appData.notifications}
+                  onChange={(e) => setAppData({...appData, notifications: parseInt(e.target.value)})}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="demo-components">
+            <DemoHeader theme={appData.theme} user={appData.user} />
+            <DemoDashboard user={appData.user} notifications={appData.notifications} messages={appData.messages} />
+          </div>
+        </div>
+
+        <div className="data-flow-code">
+          <h4>📝 Data Flow Code Example</h4>
+          <pre className="code-block">{`// App Component (Parent)
+function App() {
+  const [userData, setUserData] = useState({
+    name: 'Alex Johnson',
+    role: 'Student',
+    notifications: 3
+  });
+
+  return (
+    <div>
+      <Header user={userData} />
+      <Dashboard
+        user={userData}
+        notifications={userData.notifications}
+      />
+    </div>
+  );
+}
+
+// Header Component (Child)
+function Header({ user }) {
+  return (
+    <header>
+      <h1>Welcome, {user.name}!</h1>
+      <UserProfile user={user} />
+    </header>
+  );
+}
+
+// UserProfile Component (Grandchild)
+function UserProfile({ user }) {
+  return (
+    <div className="profile">
+      <img src="/avatar.jpg" alt={user.name} />
+      <span>{user.role}</span>
+    </div>
+  );
+}`}</pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChildrenProps() {
+  const [selectedLayout, setSelectedLayout] = useState('card');
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>👶 Children Props - The Special Prop</h3>
+          <span className="concept-badge">Advanced</span>
+        </div>
+        <p className="concept-intro">
+          The `children` prop is special in React. It represents the content between the opening
+          and closing tags of a component, allowing for flexible and reusable component composition.
+        </p>
+
+        <div className="children-examples">
+          <h4>🎯 Children Props in Action</h4>
+
+          <div className="example-section">
+            <h5>Basic Children Example</h5>
+            <div className="code-demo-grid">
+              <div className="code-panel">
+                <pre className="code-block">{`// Wrapper Component
+function Card({ children, title }) {
+  return (
+    <div className="card">
+      <h3>{title}</h3>
+      <div className="card-content">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Usage
+<Card title="Student Info">
+  <p>Name: John Doe</p>
+  <p>Major: Computer Science</p>
+  <button>View Profile</button>
+</Card>`}</pre>
+              </div>
+              <div className="result-panel">
+                <DemoCard title="Student Info">
+                  <p>Name: John Doe</p>
+                  <p>Major: Computer Science</p>
+                  <Button>View Profile</Button>
+                </DemoCard>
+              </div>
+            </div>
+          </div>
+
+          <div className="example-section">
+            <h5>🎨 Layout Components with Children</h5>
+            <div className="layout-demo">
+              <div className="layout-controls">
+                <label>Choose Layout:</label>
+                <select value={selectedLayout} onChange={(e) => setSelectedLayout(e.target.value)}>
+                  <option value="card">Card Layout</option>
+                  <option value="panel">Panel Layout</option>
+                  <option value="modal">Modal Layout</option>
+                </select>
+              </div>
+
+              <div className="layout-result">
+                {selectedLayout === 'card' && (
+                  <LayoutCard>
+                    <h4>📚 Course Information</h4>
+                    <p>This is a flexible card component that can contain any content!</p>
+                    <Button>Learn More</Button>
+                  </LayoutCard>
+                )}
+                {selectedLayout === 'panel' && (
+                  <LayoutPanel>
+                    <h4>⚙️ Settings Panel</h4>
+                    <p>Panels are great for grouping related content and actions.</p>
+                    <div style={{display: 'flex', gap: '10px'}}>
+                      <Button>Save</Button>
+                      <Button>Cancel</Button>
+                    </div>
+                  </LayoutPanel>
+                )}
+                {selectedLayout === 'modal' && (
+                  <LayoutModal>
+                    <h4>✨ Modal Dialog</h4>
+                    <p>Modals can contain any components as children!</p>
+                    <Button>Close Modal</Button>
+                  </LayoutModal>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="children-patterns">
+            <h4>🏗️ Common Children Patterns</h4>
+
+            <div className="pattern-grid">
+              <div className="pattern-item">
+                <h5>1. Wrapper Components</h5>
+                <pre className="code-block small">{`function Container({ children }) {
+  return (
+    <div className="container">
+      {children}
+    </div>
+  );
+}`}</pre>
+              </div>
+
+              <div className="pattern-item">
+                <h5>2. Conditional Rendering</h5>
+                <pre className="code-block small">{`function ConditionalWrapper({ show, children }) {
+  if (!show) return null;
+  return <div className="wrapper">{children}</div>;
+}`}</pre>
+              </div>
+
+              <div className="pattern-item">
+                <h5>3. Enhanced Children</h5>
+                <pre className="code-block small">{`function List({ children }) {
+  return (
+    <ul className="styled-list">
+      {React.Children.map(children, (child, index) => (
+        <li key={index}>{child}</li>
+      ))}
+    </ul>
+  );
+}`}</pre>
+              </div>
+
+              <div className="pattern-item">
+                <h5>4. Function as Children</h5>
+                <pre className="code-block small">{`function DataProvider({ children }) {
+  const [data, setData] = useState(null);
+
+  return children({ data, setData });
+}
+
+// Usage:
+<DataProvider>
+  {({ data, setData }) => (
+    <div>Data: {data}</div>
+  )}
+</DataProvider>`}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CallbackProps() {
+  const [parentMessage, setParentMessage] = useState('No button clicked yet');
+  const [counter, setCounter] = useState(0);
+  const [todos, setTodos] = useState(['Learn React', 'Build a project']);
+
+  const handleChildClick = (buttonName) => {
+    setParentMessage(`Child button "${buttonName}" was clicked!`);
+  };
+
+  const handleCounterChange = (newCount) => {
+    setCounter(newCount);
+  };
+
+  const handleAddTodo = (newTodo) => {
+    setTodos([...todos, newTodo]);
+  };
+
+  const handleDeleteTodo = (index) => {
+    setTodos(todos.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>📞 Callback Props - Child to Parent Communication</h3>
+          <span className="concept-badge">Essential</span>
+        </div>
+        <p className="concept-intro">
+          While data flows down through props, communication flows up through callback functions.
+          Callback props allow child components to trigger actions in their parent components.
+        </p>
+
+        <div className="callback-concept">
+          <h4>💡 How Callback Props Work</h4>
+          <div className="concept-flow">
+            <div className="flow-step">
+              <div className="step-number">1</div>
+              <div className="step-content">
+                <h5>Parent defines function</h5>
+                <code>const handleClick = (data) => {'{'}/* do something */{'}'}</code>
+              </div>
+            </div>
+            <div className="flow-arrow">⬇️</div>
+            <div className="flow-step">
+              <div className="step-number">2</div>
+              <div className="step-content">
+                <h5>Parent passes function as prop</h5>
+                <code>{'<Child onAction={handleClick} />'}</code>
+              </div>
+            </div>
+            <div className="flow-arrow">⬇️</div>
+            <div className="flow-step">
+              <div className="step-number">3</div>
+              <div className="step-content">
+                <h5>Child calls the function</h5>
+                <code>{'props.onAction(someData)'}</code>
+              </div>
+            </div>
+            <div className="flow-arrow">⬆️</div>
+            <div className="flow-step">
+              <div className="step-number">4</div>
+              <div className="step-content">
+                <h5>Parent receives data/notification</h5>
+                <code>Data flows back up!</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="callback-examples">
+          <h4>🎮 Interactive Callback Examples</h4>
+
+          <div className="example-section">
+            <h5>Example 1: Simple Button Callbacks</h5>
+            <div className="demo-container">
+              <div className="parent-state">
+                <strong>Parent State:</strong> {parentMessage}
+              </div>
+              <CallbackButtonGroup onButtonClick={handleChildClick} />
+            </div>
+            <div className="code-explanation">
+              <pre className="code-block">{`// Parent Component
+function Parent() {
+  const [message, setMessage] = useState('No button clicked');
+
+  const handleChildClick = (buttonName) => {
+    setMessage(\`Button "\${buttonName}" was clicked!\`);
+  };
+
+  return (
+    <div>
+      <p>{message}</p>
+      <ButtonGroup onButtonClick={handleChildClick} />
+    </div>
+  );
+}
+
+// Child Component
+function ButtonGroup({ onButtonClick }) {
+  return (
+    <div>
+      <button onClick={() => onButtonClick('Save')}>Save</button>
+      <button onClick={() => onButtonClick('Delete')}>Delete</button>
+      <button onClick={() => onButtonClick('Cancel')}>Cancel</button>
+    </div>
+  );
+}`}</pre>
+            </div>
+          </div>
+
+          <div className="example-section">
+            <h5>Example 2: Counter with Callbacks</h5>
+            <div className="demo-container">
+              <div className="parent-state">
+                <strong>Counter Value in Parent:</strong> {counter}
+              </div>
+              <CallbackCounter value={counter} onChange={handleCounterChange} />
+            </div>
+            <div className="code-explanation">
+              <pre className="code-block">{`// Parent manages state, child reports changes
+function Parent() {
+  const [counter, setCounter] = useState(0);
+
+  return (
+    <div>
+      <p>Count: {counter}</p>
+      <Counter value={counter} onChange={setCounter} />
+    </div>
+  );
+}
+
+function Counter({ value, onChange }) {
+  return (
+    <div>
+      <button onClick={() => onChange(value - 1)}>-</button>
+      <span>{value}</span>
+      <button onClick={() => onChange(value + 1)}>+</button>
+    </div>
+  );
+}`}</pre>
+            </div>
+          </div>
+
+          <div className="example-section">
+            <h5>Example 3: Todo List with Multiple Callbacks</h5>
+            <div className="demo-container">
+              <div className="parent-state">
+                <strong>Todos in Parent:</strong> [{todos.map(todo => `"${todo}"`).join(', ')}]
+              </div>
+              <CallbackTodoList
+                todos={todos}
+                onAddTodo={handleAddTodo}
+                onDeleteTodo={handleDeleteTodo}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="callback-best-practices">
+          <h4>✅ Callback Props Best Practices</h4>
+          <ul>
+            <li><strong>Naming Convention:</strong> Use "on" prefix for callback props (onClick, onChange, onSubmit)</li>
+            <li><strong>Keep Functions Pure:</strong> Avoid side effects in callback functions when possible</li>
+            <li><strong>Pass Relevant Data:</strong> Include necessary context/data when calling callbacks</li>
+            <li><strong>Handle Errors:</strong> Wrap callback calls in try-catch when needed</li>
+            <li><strong>Performance:</strong> Use useCallback for expensive callback functions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ComponentPatterns() {
+  const [selectedPattern, setSelectedPattern] = useState('composition');
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>🏗️ Component Composition Patterns</h3>
+          <span className="concept-badge">Advanced</span>
+        </div>
+        <p className="concept-intro">
+          Learn powerful patterns for building flexible, reusable components using props.
+          These patterns help create components that can adapt to different use cases.
+        </p>
+
+        <div className="patterns-nav">
+          <div className="pattern-tabs">
+            <button
+              className={selectedPattern === 'composition' ? 'active' : ''}
+              onClick={() => setSelectedPattern('composition')}
+            >
+              🧩 Composition
+            </button>
+            <button
+              className={selectedPattern === 'render-props' ? 'active' : ''}
+              onClick={() => setSelectedPattern('render-props')}
+            >
+              🎨 Render Props
+            </button>
+            <button
+              className={selectedPattern === 'compound' ? 'active' : ''}
+              onClick={() => setSelectedPattern('compound')}
+            >
+              🔗 Compound Components
+            </button>
+            <button
+              className={selectedPattern === 'hoc' ? 'active' : ''}
+              onClick={() => setSelectedPattern('hoc')}
+            >
+              🎭 Higher-Order Components
+            </button>
+          </div>
+        </div>
+
+        {selectedPattern === 'composition' && (
+          <div className="pattern-content">
+            <h4>🧩 Component Composition</h4>
+            <p>Build complex UIs by combining simple components, leveraging children props for flexibility.</p>
+
+            <div className="pattern-demo">
+              <h5>Example: Flexible Card System</h5>
+              <div className="demo-grid">
+                <div className="code-panel">
+                  <pre className="code-block">{`// Base Card Component
+function Card({ variant = 'default', children }) {
+  return (
+    <div className={\`card card-\${variant}\`}>
+      {children}
+    </div>
+  );
+}
+
+// Specialized Components
+function CardHeader({ children }) {
+  return <div className="card-header">{children}</div>;
+}
+
+function CardBody({ children }) {
+  return <div className="card-body">{children}</div>;
+}
+
+function CardFooter({ children }) {
+  return <div className="card-footer">{children}</div>;
+}
+
+// Usage - Composition in Action
+<Card variant="primary">
+  <CardHeader>
+    <h3>Student Profile</h3>
+  </CardHeader>
+  <CardBody>
+    <p>Name: Alice Johnson</p>
+    <p>Major: Computer Science</p>
+  </CardBody>
+  <CardFooter>
+    <Button>Edit Profile</Button>
+  </CardFooter>
+</Card>`}</pre>
+                </div>
+                <div className="result-panel">
+                  <CompositionCard variant="primary">
+                    <CompositionCardHeader>
+                      <h3>Student Profile</h3>
+                    </CompositionCardHeader>
+                    <CompositionCardBody>
+                      <p>Name: Alice Johnson</p>
+                      <p>Major: Computer Science</p>
+                    </CompositionCardBody>
+                    <CompositionCardFooter>
+                      <Button>Edit Profile</Button>
+                    </CompositionCardFooter>
+                  </CompositionCard>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedPattern === 'render-props' && (
+          <div className="pattern-content">
+            <h4>🎨 Render Props Pattern</h4>
+            <p>Share code between components using a prop whose value is a function that returns React elements.</p>
+
+            <div className="pattern-demo">
+              <h5>Example: Data Fetcher with Render Props</h5>
+              <div className="demo-grid">
+                <div className="code-panel">
+                  <pre className="code-block">{`// Data Provider Component
+function DataFetcher({ url, children }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        setError(error);
+        setLoading(false);
+      });
+  }, [url]);
+
+  return children({ data, loading, error });
+}
+
+// Usage - Multiple UI representations
+<DataFetcher url="/api/students">
+  {({ data, loading, error }) => {
+    if (loading) return <LoadingSpinner />;
+    if (error) return <ErrorMessage error={error} />;
+    return <StudentList students={data} />;
+  }}
+</DataFetcher>`}</pre>
+                </div>
+                <div className="result-panel">
+                  <RenderPropsDemo />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedPattern === 'compound' && (
+          <div className="pattern-content">
+            <h4>🔗 Compound Components</h4>
+            <p>Create components that work together as a cohesive unit, sharing implicit state.</p>
+
+            <div className="pattern-demo">
+              <h5>Example: Accordion Component</h5>
+              <div className="demo-grid">
+                <div className="code-panel">
+                  <pre className="code-block">{`// Compound Accordion Components
+const AccordionContext = createContext();
+
+function Accordion({ children, defaultOpen = null }) {
+  const [openSection, setOpenSection] = useState(defaultOpen);
+
+  return (
+    <AccordionContext.Provider value={{ openSection, setOpenSection }}>
+      <div className="accordion">{children}</div>
+    </AccordionContext.Provider>
+  );
+}
+
+function AccordionSection({ id, children }) {
+  return <div className="accordion-section">{children}</div>;
+}
+
+function AccordionHeader({ id, children }) {
+  const { openSection, setOpenSection } = useContext(AccordionContext);
+  const isOpen = openSection === id;
+
+  return (
+    <button
+      className="accordion-header"
+      onClick={() => setOpenSection(isOpen ? null : id)}
+    >
+      {children} {isOpen ? '−' : '+'}
+    </button>
+  );
+}
+
+function AccordionContent({ id, children }) {
+  const { openSection } = useContext(AccordionContext);
+  const isOpen = openSection === id;
+
+  return isOpen ? (
+    <div className="accordion-content">{children}</div>
+  ) : null;
+}
+
+// Usage
+<Accordion defaultOpen="section1">
+  <AccordionSection id="section1">
+    <AccordionHeader id="section1">What is React?</AccordionHeader>
+    <AccordionContent id="section1">
+      React is a JavaScript library for building user interfaces.
+    </AccordionContent>
+  </AccordionSection>
+
+  <AccordionSection id="section2">
+    <AccordionHeader id="section2">What are Props?</AccordionHeader>
+    <AccordionContent id="section2">
+      Props are how components communicate with each other.
+    </AccordionContent>
+  </AccordionSection>
+</Accordion>`}</pre>
+                </div>
+                <div className="result-panel">
+                  <CompoundAccordion defaultOpen="section1">
+                    <CompoundAccordionSection id="section1">
+                      <CompoundAccordionHeader id="section1">What is React?</CompoundAccordionHeader>
+                      <CompoundAccordionContent id="section1">
+                        React is a JavaScript library for building user interfaces.
+                      </CompoundAccordionContent>
+                    </CompoundAccordionSection>
+                    <CompoundAccordionSection id="section2">
+                      <CompoundAccordionHeader id="section2">What are Props?</CompoundAccordionHeader>
+                      <CompoundAccordionContent id="section2">
+                        Props are how components communicate with each other.
+                      </CompoundAccordionContent>
+                    </CompoundAccordionSection>
+                  </CompoundAccordion>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedPattern === 'hoc' && (
+          <div className="pattern-content">
+            <h4>🎭 Higher-Order Components (HOCs)</h4>
+            <p>A function that takes a component and returns a new component with enhanced functionality.</p>
+
+            <div className="pattern-demo">
+              <h5>Example: Authentication HOC</h5>
+              <div className="demo-grid">
+                <div className="code-panel">
+                  <pre className="code-block">{`// Higher-Order Component
+function withAuth(WrappedComponent) {
+  return function AuthenticatedComponent(props) {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+      // Check authentication status
+      const checkAuth = async () => {
+        try {
+          const userData = await fetchUserData();
+          setUser(userData);
+          setIsAuthenticated(true);
+        } catch (error) {
+          setIsAuthenticated(false);
+        }
+      };
+
+      checkAuth();
+    }, []);
+
+    if (!isAuthenticated) {
+      return <LoginForm onLogin={setIsAuthenticated} />;
+    }
+
+    return <WrappedComponent {...props} user={user} />;
+  };
+}
+
+// Usage
+const AuthenticatedDashboard = withAuth(Dashboard);
+const AuthenticatedProfile = withAuth(UserProfile);
+
+// Component automatically gets user prop
+function Dashboard({ user }) {
+  return (
+    <div>
+      <h1>Welcome, {user.name}!</h1>
+      <p>Dashboard content here...</p>
+    </div>
+  );
+}`}</pre>
+                </div>
+                <div className="result-panel">
+                  <HOCDemo />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PropValidation() {
+  const [componentProps, setComponentProps] = useState({
+    name: 'John Doe',
+    age: 25,
+    email: 'john@example.com',
+    isActive: true,
+    skills: ['JavaScript', 'React'],
+    address: {
+      street: '123 Main St',
+      city: 'Boston'
+    }
+  });
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>✅ Prop Validation & Type Checking</h3>
+          <span className="concept-badge">Best Practice</span>
+        </div>
+        <p className="concept-intro">
+          Prop validation helps catch bugs early by ensuring components receive the correct types
+          and required props. Learn about PropTypes and modern TypeScript approaches.
+        </p>
+
+        <div className="validation-approaches">
+          <h4>🛡️ Validation Approaches</h4>
+
+          <div className="approach-tabs">
+            <div className="approach-section">
+              <h5>📦 PropTypes (Classic Approach)</h5>
+              <div className="code-example">
+                <pre className="code-block">{`import PropTypes from 'prop-types';
+
+function UserProfile({ name, age, email, isActive, skills, address }) {
+  return (
+    <div className="user-profile">
+      <h3>{name}</h3>
+      <p>Age: {age}</p>
+      <p>Email: {email}</p>
+      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>
+      <p>Skills: {skills.join(', ')}</p>
+      <p>Address: {address.street}, {address.city}</p>
+    </div>
+  );
+}
+
+// PropTypes validation
+UserProfile.propTypes = {
+  name: PropTypes.string.isRequired,
+  age: PropTypes.number.isRequired,
+  email: PropTypes.string.isRequired,
+  isActive: PropTypes.bool,
+  skills: PropTypes.arrayOf(PropTypes.string),
+  address: PropTypes.shape({
+    street: PropTypes.string,
+    city: PropTypes.string
+  }),
+  onUpdate: PropTypes.func
+};
+
+// Default values
+UserProfile.defaultProps = {
+  isActive: true,
+  skills: [],
+  address: { street: '', city: '' }
+};`}</pre>
+              </div>
+            </div>
+
+            <div className="approach-section">
+              <h5>🔷 TypeScript (Modern Approach)</h5>
+              <div className="code-example">
+                <pre className="code-block">{`// TypeScript interface
+interface UserProfileProps {
+  name: string;
+  age: number;
+  email: string;
+  isActive?: boolean;
+  skills?: string[];
+  address?: {
+    street: string;
+    city: string;
+  };
+  onUpdate?: (user: UserProfileProps) => void;
+}
+
+// Component with typed props
+function UserProfile({
+  name,
+  age,
+  email,
+  isActive = true,
+  skills = [],
+  address = { street: '', city: '' },
+  onUpdate
+}: UserProfileProps) {
+  return (
+    <div className="user-profile">
+      <h3>{name}</h3>
+      <p>Age: {age}</p>
+      <p>Email: {email}</p>
+      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>
+      <p>Skills: {skills.join(', ')}</p>
+      <p>Address: {address.street}, {address.city}</p>
+      {onUpdate && (
+        <button onClick={() => onUpdate({ name, age, email, isActive, skills, address })}>
+          Update Profile
+        </button>
+      )}
+    </div>
+  );
+}`}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="validation-demo">
+          <h4>🧪 Interactive Prop Validation Demo</h4>
+          <p>Modify the props below and see how validation works:</p>
+
+          <div className="demo-controls">
+            <div className="control-grid">
+              <div className="control-group">
+                <label>Name (string, required):</label>
+                <input
+                  type="text"
+                  value={componentProps.name}
+                  onChange={(e) => setComponentProps({...componentProps, name: e.target.value})}
+                />
+              </div>
+
+              <div className="control-group">
+                <label>Age (number, required):</label>
+                <input
+                  type="number"
+                  value={componentProps.age}
+                  onChange={(e) => setComponentProps({...componentProps, age: parseInt(e.target.value) || 0})}
+                />
+              </div>
+
+              <div className="control-group">
+                <label>Email (string, required):</label>
+                <input
+                  type="email"
+                  value={componentProps.email}
+                  onChange={(e) => setComponentProps({...componentProps, email: e.target.value})}
+                />
+              </div>
+
+              <div className="control-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={componentProps.isActive}
+                    onChange={(e) => setComponentProps({...componentProps, isActive: e.target.checked})}
+                  />
+                  Is Active (boolean, optional)
+                </label>
+              </div>
+
+              <div className="control-group">
+                <label>Skills (array of strings):</label>
+                <input
+                  type="text"
+                  value={componentProps.skills.join(', ')}
+                  placeholder="Enter skills separated by commas"
+                  onChange={(e) => setComponentProps({
+                    ...componentProps,
+                    skills: e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="demo-result">
+            <h5>Component Output:</h5>
+            <ValidatedUserProfile {...componentProps} />
+          </div>
+        </div>
+
+        <div className="validation-types">
+          <h4>📋 Common PropTypes</h4>
+          <div className="types-grid">
+            <div className="type-item">
+              <h5>Basic Types</h5>
+              <ul>
+                <li><code>PropTypes.string</code> - String values</li>
+                <li><code>PropTypes.number</code> - Numeric values</li>
+                <li><code>PropTypes.bool</code> - Boolean values</li>
+                <li><code>PropTypes.func</code> - Functions</li>
+                <li><code>PropTypes.object</code> - Objects</li>
+                <li><code>PropTypes.array</code> - Arrays</li>
+              </ul>
+            </div>
+
+            <div className="type-item">
+              <h5>Complex Types</h5>
+              <ul>
+                <li><code>PropTypes.arrayOf(PropTypes.string)</code> - Array of strings</li>
+                <li><code>PropTypes.objectOf(PropTypes.number)</code> - Object with number values</li>
+                <li><code>PropTypes.shape({'{}'})</code> - Object with specific shape</li>
+                <li><code>PropTypes.oneOf(['a', 'b'])</code> - Enum values</li>
+                <li><code>PropTypes.oneOfType([...])</code> - Union types</li>
+                <li><code>PropTypes.instanceOf(Date)</code> - Instance of class</li>
+              </ul>
+            </div>
+
+            <div className="type-item">
+              <h5>Validators</h5>
+              <ul>
+                <li><code>.isRequired</code> - Makes prop required</li>
+                <li><code>PropTypes.node</code> - Anything renderable</li>
+                <li><code>PropTypes.element</code> - React element</li>
+                <li><code>PropTypes.elementType</code> - Component type</li>
+                <li>Custom validators - Custom validation functions</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PropsExercise() {
+  const [exerciseState, setExerciseState] = useState({
+    currentStep: 1,
+    userSolution: '',
+    feedback: '',
+    isCorrect: false
+  });
+
+  const exercises = [
+    {
+      id: 1,
+      title: "Basic Props Passing",
+      description: "Create a Welcome component that accepts name and role props",
+      starter: `function Welcome(props) {
+  return (
+    <div>
+      {/* Add your code here */}
+    </div>
+  );
+}`,
+      solution: `function Welcome(props) {
+  return (
+    <div>
+      <h2>Welcome, {props.name}!</h2>
+      <p>Role: {props.role}</p>
+    </div>
+  );
+}`,
+      test: "Should display 'Welcome, Alice!' and 'Role: Student'"
+    },
+    {
+      id: 2,
+      title: "Destructured Props",
+      description: "Rewrite the component using prop destructuring",
+      starter: `function UserCard(props) {
+  return (
+    <div className="user-card">
+      <img src={props.avatar} alt={props.name} />
+      <h3>{props.name}</h3>
+      <p>{props.email}</p>
+    </div>
+  );
+}`,
+      solution: `function UserCard({ avatar, name, email }) {
+  return (
+    <div className="user-card">
+      <img src={avatar} alt={name} />
+      <h3>{name}</h3>
+      <p>{email}</p>
+    </div>
+  );
+}`,
+      test: "Should use destructured props instead of props.propertyName"
+    },
+    {
+      id: 3,
+      title: "Children Props",
+      description: "Create a Card component that renders its children",
+      starter: `function Card(props) {
+  return (
+    <div className="card">
+      {/* Add your code here */}
+    </div>
+  );
+}`,
+      solution: `function Card({ children, title }) {
+  return (
+    <div className="card">
+      {title && <h3>{title}</h3>}
+      {children}
+    </div>
+  );
+}`,
+      test: "Should render children content inside a card wrapper"
+    }
+  ];
+
+  const currentExercise = exercises[exerciseState.currentStep - 1];
+
+  const checkSolution = () => {
+    const isCorrect = exerciseState.userSolution.trim().includes(currentExercise.solution.trim());
+    setExerciseState({
+      ...exerciseState,
+      isCorrect,
+      feedback: isCorrect ? '✅ Correct! Well done!' : '❌ Not quite right. Check the solution hint.'
+    });
+  };
+
+  const nextExercise = () => {
+    if (exerciseState.currentStep < exercises.length) {
+      setExerciseState({
+        currentStep: exerciseState.currentStep + 1,
+        userSolution: exercises[exerciseState.currentStep].starter,
+        feedback: '',
+        isCorrect: false
+      });
+    }
+  };
+
+  return (
+    <div className="content-section">
+      <div className="concept-card featured">
+        <div className="concept-header">
+          <h3>💪 Props Practice Exercise</h3>
+          <span className="concept-badge">Hands-On</span>
+        </div>
+        <p className="concept-intro">
+          Test your understanding of props with these hands-on exercises.
+          Work through each challenge to solidify your knowledge.
+        </p>
+
+        <div className="exercise-progress">
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{width: `${(exerciseState.currentStep / exercises.length) * 100}%`}}
+            ></div>
+          </div>
+          <span>Exercise {exerciseState.currentStep} of {exercises.length}</span>
+        </div>
+
+        <div className="exercise-content">
+          <div className="exercise-header">
+            <h4>{currentExercise.title}</h4>
+            <p>{currentExercise.description}</p>
+            <div className="test-requirement">
+              <strong>Test Requirement:</strong> {currentExercise.test}
+            </div>
+          </div>
+
+          <div className="exercise-workspace">
+            <div className="code-editor">
+              <h5>Your Code:</h5>
+              <textarea
+                value={exerciseState.userSolution}
+                onChange={(e) => setExerciseState({...exerciseState, userSolution: e.target.value})}
+                placeholder={currentExercise.starter}
+                rows="10"
+                className="code-textarea"
+              />
+            </div>
+
+            <div className="exercise-controls">
+              <button className="check-btn" onClick={checkSolution}>
+                Check Solution
+              </button>
+              {exerciseState.isCorrect && exerciseState.currentStep < exercises.length && (
+                <button className="next-btn" onClick={nextExercise}>
+                  Next Exercise →
+                </button>
+              )}
+            </div>
+
+            {exerciseState.feedback && (
+              <div className={`feedback ${exerciseState.isCorrect ? 'success' : 'error'}`}>
+                {exerciseState.feedback}
+              </div>
+            )}
+          </div>
+
+          <div className="exercise-hint">
+            <details>
+              <summary>💡 Need a hint? Click here for the solution</summary>
+              <pre className="code-block">{currentExercise.solution}</pre>
+            </details>
+          </div>
+        </div>
+
+        <div className="exercise-summary">
+          <h4>🎯 Key Takeaways</h4>
+          <ul>
+            <li>Props enable data flow from parent to child components</li>
+            <li>Use destructuring to make your code cleaner and more readable</li>
+            <li>The children prop allows for flexible component composition</li>
+            <li>Always validate your props for better debugging and reliability</li>
+            <li>Callback props enable child-to-parent communication</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Helper components for Day 2 demos
+function DemoHeader({ theme, user }) {
+  return (
+    <div className={`demo-header theme-${theme}`}>
+      <h4>📱 App Header</h4>
+      <p>Theme: {theme} | User: {user.name}</p>
+    </div>
+  );
+}
+
+function DemoDashboard({ user, notifications, messages }) {
+  return (
+    <div className="demo-dashboard">
+      <h4>📊 Dashboard</h4>
+      <p>Welcome, {user.name}!</p>
+      <div className="notification-badge">{notifications} notifications</div>
+      <div className="messages">
+        {messages.slice(0, 2).map((msg, i) => (
+          <div key={i} className="message">{msg}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DemoCard({ title, children }) {
+  return (
+    <div className="demo-card">
+      <h4>{title}</h4>
+      <div className="demo-card-content">{children}</div>
+    </div>
+  );
+}
+
+function LayoutCard({ children }) {
+  return <div className="layout-card">{children}</div>;
+}
+
+function LayoutPanel({ children }) {
+  return <div className="layout-panel">{children}</div>;
+}
+
+function LayoutModal({ children }) {
+  return <div className="layout-modal">{children}</div>;
+}
+
+function CallbackButtonGroup({ onButtonClick }) {
+  return (
+    <div className="callback-buttons">
+      <button onClick={() => onButtonClick('Save')} className="btn-save">Save</button>
+      <button onClick={() => onButtonClick('Delete')} className="btn-delete">Delete</button>
+      <button onClick={() => onButtonClick('Cancel')} className="btn-cancel">Cancel</button>
+    </div>
+  );
+}
+
+function CallbackCounter({ value, onChange }) {
+  return (
+    <div className="callback-counter">
+      <button onClick={() => onChange(value - 1)} disabled={value <= 0}>-</button>
+      <span className="counter-value">{value}</span>
+      <button onClick={() => onChange(value + 1)}>+</button>
+    </div>
+  );
+}
+
+function CallbackTodoList({ todos, onAddTodo, onDeleteTodo }) {
+  const [newTodo, setNewTodo] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (newTodo.trim()) {
+      onAddTodo(newTodo.trim());
+      setNewTodo('');
+    }
+  };
+
+  return (
+    <div className="callback-todos">
+      <form onSubmit={handleSubmit} className="todo-form">
+        <input
+          type="text"
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+          placeholder="Add new todo..."
+        />
+        <button type="submit">Add</button>
+      </form>
+      <ul className="todo-list">
+        {todos.map((todo, index) => (
+          <li key={index} className="todo-item">
+            {todo}
+            <button onClick={() => onDeleteTodo(index)} className="delete-btn">×</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CompositionCard({ variant, children }) {
+  return <div className={`composition-card ${variant}`}>{children}</div>;
+}
+
+function CompositionCardHeader({ children }) {
+  return <div className="composition-card-header">{children}</div>;
+}
+
+function CompositionCardBody({ children }) {
+  return <div className="composition-card-body">{children}</div>;
+}
+
+function CompositionCardFooter({ children }) {
+  return <div className="composition-card-footer">{children}</div>;
+}
+
+function RenderPropsDemo() {
+  const [mockData, setMockData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setMockData(['Alice Johnson', 'Bob Smith', 'Carol Wilson']);
+      setLoading(false);
+    }, 2000);
+  }, []);
+
+  if (loading) return <div className="loading-demo">Loading students...</div>;
+
+  return (
+    <div className="render-props-result">
+      <h5>Student List:</h5>
+      <ul>
+        {mockData.map((student, i) => (
+          <li key={i}>{student}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// React Context for compound components
+const AccordionContext = React.createContext();
+
+function CompoundAccordion({ children, defaultOpen }) {
+  const [openSection, setOpenSection] = useState(defaultOpen);
+
+  return (
+    <AccordionContext.Provider value={{ openSection, setOpenSection }}>
+      <div className="compound-accordion">{children}</div>
+    </AccordionContext.Provider>
+  );
+}
+
+function CompoundAccordionSection({ id, children }) {
+  return <div className="accordion-section">{children}</div>;
+}
+
+function CompoundAccordionHeader({ id, children }) {
+  const { openSection, setOpenSection } = React.useContext(AccordionContext);
+  const isOpen = openSection === id;
+
+  return (
+    <button
+      className={`accordion-header ${isOpen ? 'open' : ''}`}
+      onClick={() => setOpenSection(isOpen ? null : id)}
+    >
+      {children} <span>{isOpen ? '−' : '+'}</span>
+    </button>
+  );
+}
+
+function CompoundAccordionContent({ id, children }) {
+  const { openSection } = React.useContext(AccordionContext);
+  const isOpen = openSection === id;
+
+  return isOpen ? (
+    <div className="accordion-content">{children}</div>
+  ) : null;
+}
+
+function HOCDemo() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const MockDashboard = ({ user }) => (
+    <div className="hoc-dashboard">
+      <h4>Dashboard</h4>
+      <p>Welcome, {user?.name || 'User'}!</p>
+      <p>This component is wrapped with authentication.</p>
+    </div>
+  );
+
+  const withAuth = (WrappedComponent) => {
+    return function AuthenticatedComponent(props) {
+      if (!isAuthenticated) {
+        return (
+          <div className="hoc-login">
+            <p>Please log in to continue</p>
+            <button onClick={() => setIsAuthenticated(true)}>
+              Log In
+            </button>
+          </div>
+        );
+      }
+
+      return <WrappedComponent {...props} user={{ name: 'John Doe' }} />;
+    };
+  };
+
+  const AuthenticatedDashboard = withAuth(MockDashboard);
+
+  return (
+    <div className="hoc-demo">
+      <AuthenticatedDashboard />
+      {isAuthenticated && (
+        <button onClick={() => setIsAuthenticated(false)}>
+          Log Out
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ValidatedUserProfile({ name, age, email, isActive, skills, address }) {
+  return (
+    <div className="validated-profile">
+      <h4>{name}</h4>
+      <p>Age: {age}</p>
+      <p>Email: {email}</p>
+      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>
+      <p>Skills: {skills.join(', ') || 'None listed'}</p>
+      <p>Address: {address.street || 'No street'}, {address.city || 'No city'}</p>
     </div>
   );
 }
